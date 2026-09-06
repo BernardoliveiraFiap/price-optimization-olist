@@ -40,6 +40,12 @@ class SynthParams:
 
     # True elasticity per category, drawn in this range (always negative).
     elasticity_range: tuple[float, float] = (-2.6, -0.9)
+    # Latent product quality: the classic omitted variable. It lifts both
+    # willingness to pay and the price a seller can charge, and it is
+    # time-invariant -- so a product fixed effect removes it and pooled OLS
+    # cannot.
+    quality_on_demand: float = 0.70
+    quality_on_price: float = 0.50
 
     # Latent demand shock: AR(1) persistence and innovation scale.
     xi_rho: float = 0.55
@@ -52,7 +58,7 @@ class SynthParams:
     # Pricing rule. ``price_on_xi`` is the endogeneity knob: set it to 0.0 and
     # OLS becomes consistent, which is a useful sanity check in tests.
     price_on_cost: float = 0.55
-    price_on_xi: float = 0.60
+    price_on_xi: float = 0.45
     price_noise_sd: float = 0.12
 
     demand_noise_sd: float = 0.25
@@ -104,10 +110,21 @@ def make_panel(params: SynthParams | None = None) -> tuple[pd.DataFrame, dict]:
     ).astype(float)
     base_freight = rng.gamma(shape=4.0, scale=4.0, size=n)[:, None]
     freight = base_freight * np.exp(rng.normal(0.0, 0.15, size=(n, t)))
-    review_score = np.clip(rng.normal(4.1, 0.5, size=n), 1.0, 5.0)[:, None]
+
+    # Latent quality: never handed to any estimator. The star rating is only a
+    # noisy proxy for it, which is why controlling for reviews narrows the
+    # omitted-variable bias without closing it.
+    quality = rng.normal(0.0, 1.0, size=n)[:, None]
+    review_score = np.clip(
+        4.1 + 0.35 * quality + rng.normal(0.0, 0.35, size=n)[:, None], 1.0, 5.0
+    )
 
     # --- prices -----------------------------------------------------------
-    log_base_price = rng.normal(3.9, 0.55, size=n)[:, None]   # ~R$ 50 median
+    log_base_price = (                                        # ~R$ 50 median
+        3.9
+        + p.quality_on_price * quality
+        + rng.normal(0.0, 0.35, size=n)[:, None]
+    )
     log_price = (
         log_base_price
         + p.price_on_cost * cost
@@ -117,7 +134,11 @@ def make_panel(params: SynthParams | None = None) -> tuple[pd.DataFrame, dict]:
     )
 
     # --- demand -----------------------------------------------------------
-    alpha = rng.normal(1.6, 0.6, size=n)[:, None]             # unit popularity
+    alpha = (                                        # baseline unit popularity
+        1.6
+        + p.quality_on_demand * quality
+        + rng.normal(0.0, 0.35, size=n)[:, None]
+    )
     week_idx = np.arange(t)[None, :]
     gamma = (
         p.seasonal_amp * np.sin(2 * np.pi * week_idx / 52.0)
