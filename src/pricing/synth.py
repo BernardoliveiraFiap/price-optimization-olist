@@ -49,16 +49,19 @@ class SynthParams:
 
     # Latent demand shock: AR(1) persistence and innovation scale.
     xi_rho: float = 0.55
-    xi_sd: float = 0.35
+    xi_sd: float = 0.30
 
     # Cost shifter (instrument): AR(1).
     cost_rho: float = 0.70
-    cost_sd: float = 0.22
+    cost_sd: float = 0.30
 
-    # Pricing rule. ``price_on_xi`` is the endogeneity knob: set it to 0.0 and
-    # OLS becomes consistent, which is a useful sanity check in tests.
-    price_on_cost: float = 0.55
-    price_on_xi: float = 0.45
+    # Pricing rule. Week-to-week price moves are mostly cost- and
+    # promotion-driven, with a smaller demand-chasing component -- the usual
+    # picture for a long-tail marketplace of small sellers.
+    # ``price_on_xi`` is the endogeneity knob: set it to 0.0 and OLS becomes
+    # consistent, which is a useful sanity check in tests.
+    price_on_cost: float = 0.90
+    price_on_xi: float = 0.25
     price_noise_sd: float = 0.12
 
     demand_noise_sd: float = 0.25
