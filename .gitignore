@@ -9,3 +9,4 @@ __pycache__/
 .ruff_cache/
 reports/figures/*.png
 !reports/figures/.gitkeep
+reports/*.csv
