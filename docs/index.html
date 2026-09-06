@@ -193,7 +193,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 }
 @keyframes blink{to{visibility:hidden}}
 .term-prog{height:2px;background:rgba(255,255,255,.12);overflow:hidden}
-.term-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s linear}
+.term-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .85s ease-out}
 .term-foot{
   padding:.55rem 1.1rem .8rem;font-family:var(--mono);font-size:.72rem;
   color:rgba(255,255,255,.5);border-top:1px solid rgba(255,255,255,.08);
@@ -891,13 +891,12 @@ document.querySelectorAll(".term").forEach(term => {
     bar.style.width = "0";
 
     // A short, fixed sweep: the point is the reveal, not a fake wait
-    // proportional to a two-minute pipeline run.
+    // proportional to a two-minute pipeline run. The bar is animated by CSS
+    // and the reveal is on a timeout, because rAF stops in a background tab
+    // and would leave the block stuck on "running".
     const DURATION = 900;
-    const start = performance.now();
-    const step = (now) => {
-      const k = Math.min((now - start) / DURATION, 1);
-      bar.style.width = (k * 100).toFixed(1) + "%";
-      if (k < 1) return requestAnimationFrame(step);
+    requestAnimationFrame(() => { bar.style.width = "100%"; });
+    setTimeout(() => {
       prog.hidden = true;
       idle.hidden = true;
       pre.hidden = false;
@@ -906,8 +905,7 @@ document.querySelectorAll(".term").forEach(term => {
       btn.dataset.done = "1";
       btn.disabled = false;
       btn.textContent = t("term.again");
-    };
-    requestAnimationFrame(step);
+    }, DURATION);
   });
 });
 
