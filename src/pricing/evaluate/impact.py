@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 
 from ..config import DEFAULT_MARGIN_RATE
+from ..optimize.milp import OptimisationConfig, optimise_prices
 
 
 def build_products(
@@ -104,3 +105,43 @@ def evaluate_policy(
         "volume_change_pct": 100.0
         * (float(units_real.sum()) / float(d["units_before"].sum()) - 1.0),
     }
+
+
+def cost_of_naive_elasticity(
+    products: pd.DataFrame,
+    beta_naive: dict[str, float] | float,
+    beta_causal: dict[str, float] | float,
+    config: OptimisationConfig | None = None,
+) -> pd.DataFrame:
+    """Price with the biased estimate, get judged by the credible one.
+
+    Returns one row per belief, both scored under ``beta_causal``. The
+    difference is the margin left on the table by trusting pooled OLS.
+    """
+    cfg = config or OptimisationConfig()
+    rows = []
+    for label, belief in (("naive OLS belief", beta_naive), ("IV belief", beta_causal)):
+        p = products.copy()
+        if isinstance(belief, dict):
+            fallback = float(np.mean(list(belief.values())))
+            p["elasticity"] = p["category"].map(belief).fillna(fallback)
+        else:
+            p["elasticity"] = float(belief)
+
+        result = optimise_prices(p, cfg)
+        scored = evaluate_policy(result.prices, beta_causal, cfg.margin_rate)
+        rows.append(
+            {
+                "priced_with": label,
+                "scored_under": "IV elasticity",
+                "avg_price_change_pct": result.summary["avg_price_change_pct"],
+                **{k: scored[k] for k in
+                   ("margin_uplift_pct", "revenue_uplift_pct", "volume_change_pct")},
+            }
+        )
+
+    out = pd.DataFrame(rows)
+    out["margin_left_on_table_pct"] = (
+        out["margin_uplift_pct"].max() - out["margin_uplift_pct"]
+    )
+    return out
