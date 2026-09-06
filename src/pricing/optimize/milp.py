@@ -129,3 +129,130 @@ def _baseline(products: pd.DataFrame, config: OptimisationConfig) -> dict:
         "units": float(products["units"].sum()),
         "revenue_weights": (revenue / revenue.sum()).to_numpy(),
     }
+
+
+def optimise_prices(
+    products: pd.DataFrame, config: OptimisationConfig | None = None
+) -> OptimisationResult:
+    """Solve the constrained portfolio pricing MILP."""
+    cfg = config or OptimisationConfig()
+    grid = build_price_grid(products, cfg)
+    base = _baseline(products, cfg)
+
+    units_index = {u: i for i, u in enumerate(products["unit_id"].to_numpy())}
+    weight_by_unit = dict(
+        zip(products["unit_id"], base["revenue_weights"], strict=True)
+    )
+
+    problem = pulp.LpProblem("portfolio_pricing", pulp.LpMaximize)
+    x = {
+        (row.unit_id, row.grid_k): pulp.LpVariable(
+            f"x_{units_index[row.unit_id]}_{row.grid_k}", cat="Binary"
+        )
+        for row in grid.itertuples()
+    }
+
+    # Objective: total gross margin.
+    problem += pulp.lpSum(
+        row.cand_margin * x[(row.unit_id, row.grid_k)] for row in grid.itertuples()
+    )
+
+    # One price per product.
+    for unit_id, chunk in grid.groupby("unit_id", sort=False):
+        problem += (
+            pulp.lpSum(x[(unit_id, k)] for k in chunk["grid_k"]) == 1,
+            f"one_price_{units_index[unit_id]}",
+        )
+
+    # Revenue guardrail: chasing margin must not quietly shrink the top line.
+    problem += (
+        pulp.lpSum(
+            row.cand_revenue * x[(row.unit_id, row.grid_k)]
+            for row in grid.itertuples()
+        )
+        >= cfg.min_revenue_ratio * base["revenue"],
+        "revenue_floor",
+    )
+
+    # Average price guardrail, weighted by each product's share of revenue, so
+    # a tiny product cannot buy headroom for a big one.
+    problem += (
+        pulp.lpSum(
+            weight_by_unit[row.unit_id] * row.delta * x[(row.unit_id, row.grid_k)]
+            for row in grid.itertuples()
+        )
+        <= cfg.max_avg_price_increase,
+        "avg_price_cap",
+    )
+
+    if cfg.min_volume_ratio is not None:
+        problem += (
+            pulp.lpSum(
+                row.cand_units * x[(row.unit_id, row.grid_k)]
+                for row in grid.itertuples()
+            )
+            >= cfg.min_volume_ratio * base["units"],
+            "volume_floor",
+        )
+
+    solver = pulp.PULP_CBC_CMD(msg=cfg.solver_msg, timeLimit=cfg.time_limit_s)
+    problem.solve(solver)
+    status = pulp.LpStatus[problem.status]
+
+    chosen = grid[
+        [bool(x[(r.unit_id, r.grid_k)].value()) for r in grid.itertuples()]
+    ].copy()
+    chosen = chosen.rename(
+        columns={
+            "price": "price_before",
+            "units": "units_before",
+            "cand_price": "price_after",
+            "cand_units": "units_after",
+        }
+    )
+    chosen["price_change_pct"] = 100.0 * chosen["delta"]
+
+    summary = {
+        "status": status,
+        "n_products": int(len(products)),
+        "revenue_baseline": base["revenue"],
+        "revenue_optimised": float(chosen["cand_revenue"].sum()),
+        "margin_baseline": base["margin"],
+        "margin_optimised": float(chosen["cand_margin"].sum()),
+        "units_baseline": base["units"],
+        "units_optimised": float(chosen["units_after"].sum()),
+    }
+    summary["margin_uplift_pct"] = 100.0 * (
+        summary["margin_optimised"] / summary["margin_baseline"] - 1.0
+    )
+    summary["revenue_uplift_pct"] = 100.0 * (
+        summary["revenue_optimised"] / summary["revenue_baseline"] - 1.0
+    )
+    summary["volume_change_pct"] = 100.0 * (
+        summary["units_optimised"] / summary["units_baseline"] - 1.0
+    )
+    summary["avg_price_change_pct"] = 100.0 * float(
+        (chosen["delta"].to_numpy() * base["revenue_weights"]).sum()
+    )
+    summary["share_price_up"] = float((chosen["delta"] > 1e-9).mean())
+    summary["share_price_down"] = float((chosen["delta"] < -1e-9).mean())
+
+    keep = [
+        "unit_id",
+        "price_before",
+        "price_after",
+        "price_change_pct",
+        "units_before",
+        "units_after",
+        "unit_cost",
+        "elasticity",
+        "cand_revenue",
+        "cand_margin",
+    ]
+    if "category" in chosen.columns:
+        keep.insert(1, "category")
+    return OptimisationResult(
+        prices=chosen[keep].sort_values("unit_id").reset_index(drop=True),
+        summary=summary,
+        status=status,
+    )
