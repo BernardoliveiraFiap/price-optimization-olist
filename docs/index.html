@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Price Optimization on Brazilian E-Commerce Data</title>
-<meta name="description" content="Estimating price elasticity from observational marketplace data, and turning that estimate into a constrained price list — with a pipeline that is allowed to refuse." />
+<meta name="description" content="Estimating price elasticity from observational marketplace data, and turning that estimate into a constrained price list, with a pipeline that is allowed to refuse." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -167,6 +167,53 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.79rem;color:var(--ink-2);margin-bottom:.75rem}
 .legend i{width:.65rem;height:.65rem;border-radius:3px;display:inline-block;margin-right:.35rem;vertical-align:-1px}
 
+/* ---- the two traps, side by side --------------------------------------- */
+.traps{display:grid;grid-template-columns:1fr 1fr;gap:2.6rem;margin-top:.4rem}
+.traps > div{min-width:0}
+.traps h3{margin-top:1.6rem}
+.traps p{max-width:none}
+.traps table{min-width:0}
+@media(max-width:880px){.traps{grid-template-columns:1fr;gap:.6rem}}
+
+/* ---- terminal run control ----------------------------------------------- */
+.term-run{
+  margin-left:auto;font-family:var(--sans);font-size:.74rem;font-weight:600;
+  letter-spacing:.04em;border:0;border-radius:999px;padding:.32rem .82rem;
+  background:var(--accent);color:var(--midnight);cursor:pointer;flex:none;
+}
+.term-run:hover{background:#aefa93}
+.term-run[disabled]{background:rgba(255,255,255,.16);color:rgba(255,255,255,.6);cursor:default}
+.term-idle{
+  padding:1.4rem 1.1rem;font-family:var(--mono);font-size:.78rem;
+  color:rgba(255,255,255,.42);display:flex;align-items:center;gap:.55rem;
+}
+.term-idle .caret{
+  width:.5rem;height:1rem;background:var(--accent);opacity:.75;
+  animation:blink 1.1s steps(2,start) infinite;
+}
+@keyframes blink{to{visibility:hidden}}
+.term-prog{height:2px;background:rgba(255,255,255,.12);overflow:hidden}
+.term-prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s linear}
+.term-foot{
+  padding:.55rem 1.1rem .8rem;font-family:var(--mono);font-size:.72rem;
+  color:rgba(255,255,255,.5);border-top:1px solid rgba(255,255,255,.08);
+}
+
+/* ---- limitations as cards, each with its remedy ------------------------- */
+.lims{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1.5rem}
+@media(max-width:880px){.lims{grid-template-columns:1fr}}
+.lim{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.2rem 1.2rem}
+.lim h4{font-size:1rem;font-weight:600;margin-bottom:.4rem;letter-spacing:-.01em}
+.lim p{font-size:.89rem;line-height:1.55;color:var(--ink-2);margin:0;max-width:none}
+.lim .fix{
+  margin-top:.85rem;padding-top:.8rem;border-top:1px dashed var(--line);
+  font-size:.86rem;line-height:1.55;color:var(--ink);
+}
+.lim .fix b{
+  display:block;font-size:.68rem;font-weight:700;letter-spacing:.11em;
+  text-transform:uppercase;color:var(--green-500);margin-bottom:.28rem;
+}
+
 /* ---- approach: five steps across ---------------------------------------- */
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:1.6rem}
@@ -216,14 +263,14 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
   <div class="wrap">
     <div class="kicker" data-i18n="hero.kicker">Causal inference · Optimization · Machine learning</div>
     <h1 data-i18n="hero.title">Price Optimization on Brazilian E-Commerce Data</h1>
-    <p class="lede" data-i18n-html="hero.lede">Estimating price elasticity from observational marketplace data, turning that estimate into a constrained price list &mdash; and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.</p>
+    <p class="lede" data-i18n-html="hero.lede">Estimating price elasticity from observational marketplace data, turning that estimate into a constrained price list, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.</p>
     <div class="links">
       <a class="btn btn-primary" href="https://github.com/BernardoliveiraFiap/price-optimization-olist" data-i18n="hero.repo">View the repository</a>
       <a class="btn btn-ghost" href="#run" data-i18n="hero.see">See it run</a>
     </div>
     <div class="stats">
       <div class="stat"><b>16,278</b><span data-i18n="hero.s1">product-week observations</span></div>
-      <div class="stat"><b>3 / 20</b><span data-i18n="hero.s2">categories priced &mdash; the rest refused</span></div>
+      <div class="stat"><b>3 / 20</b><span data-i18n="hero.s2">categories priced, the rest refused</span></div>
       <div class="stat"><b>+7.56%</b><span data-i18n="hero.s3">margin uplift, guardrails respected</span></div>
       <div class="stat"><b>30</b><span data-i18n="hero.s4">tests, re-run by CI on every push</span></div>
     </div>
@@ -237,15 +284,19 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <h2 data-i18n="problem.h2">Price is not assigned at random</h2>
     <p class="intro" data-i18n="problem.intro">Two traps sit between a dataset and a price list. The first is statistical, the second is about decisions. Most analyses fall into both.</p>
 
-    <h3 data-i18n="problem.t1h">Trap 1 &mdash; the confound</h3>
+    <div class="traps">
+     <div>
+    <h3 data-i18n="problem.t1h">Trap 1: the confound</h3>
     <p data-i18n="problem.t1a">Suppose you record the price and the occupancy of a hundred restaurants. The expensive ones are fuller. Does raising prices fill a restaurant?</p>
     <p data-i18n-html="problem.t1b">Of course not. The expensive restaurant is expensive <em>because it is good</em>. You did not measure the effect of price; you measured the effect of quality, which was hiding behind price. The same thing happens to products: a seller charges more for exactly the items people want most.</p>
     <div class="callout">
       <div class="lbl" data-i18n="problem.calloutLbl">The direction of the error is always the same</div>
-      <p data-i18n-html="problem.calloutBody">Demand looks <strong>less</strong> price-sensitive than it is. In business terms: raising prices looks safe when it is not. On the Olist data, naive OLS returns <code>&minus;0.002</code> &mdash; the effect is not shrunk, it is erased.</p>
+      <p data-i18n-html="problem.calloutBody">Demand looks <strong>less</strong> price-sensitive than it is. In business terms: raising prices looks safe when it is not. On the Olist data, naive OLS returns <code>&minus;0.002</code>. The effect is not shrunk, it is erased.</p>
     </div>
 
-    <h3 data-i18n="problem.t2h">Trap 2 &mdash; an elasticity is not a price</h3>
+     </div>
+     <div>
+    <h3 data-i18n="problem.t2h">Trap 2: an elasticity is not a price</h3>
     <p data-i18n="problem.t2a">Suppose the elasticity is correct. The optimal price for one product in isolation is a textbook formula, and it is useless, because no pricing team moves one product alone. Real constraints couple the whole portfolio:</p>
     <div class="tbl-wrap">
       <table>
@@ -259,6 +310,8 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       </table>
     </div>
     <p data-i18n="problem.t2b">Drop one price and another has to carry the average. That is no longer arithmetic; it is a constrained optimization problem, which is why a MILP sits at the end of the chain.</p>
+     </div>
+    </div>
   </div>
 </section>
 
@@ -293,7 +346,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       <div class="step gate">
         <div class="step-n">5</div>
         <h4 data-i18n="approach.s5h">Refuse</h4>
-        <p data-i18n-html="approach.s5p">Two gates stand between an estimate and a price list, and <strong>on the real data both fire</strong>. An instrument with a first-stage F below 10 is not used; a category that is not credibly elastic is not priced. <strong>77% of panel revenue receives no recommendation</strong> &mdash; the correct answer, not a gap to fill by lowering the bar.</p>
+        <p data-i18n-html="approach.s5p">Two gates stand between an estimate and a price list, and <strong>on the real data both fire</strong>. An instrument with a first-stage F below 10 is not used; a category that is not credibly elastic is not priced. <strong>77% of panel revenue receives no recommendation</strong>. That is the correct answer, not a gap to fill by lowering the bar.</p>
       </div>
     </div>
   </div>
@@ -329,13 +382,16 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <p class="intro" data-i18n="run.intro">Every block below is real captured output from the commands as written, not a mockup. The numbers on this page and the numbers in the repository come from the same runs.</p>
 
     <h3 data-i18n="run.h3a">1. Validate the estimators against a known truth</h3>
-    <p class="muted" data-i18n="run.pa">No data download needed &mdash; the market is generated.</p>
+    <p class="muted" data-i18n="run.pa">No data download needed: the market is generated.</p>
     <div class="term">
       <div class="term-bar">
         <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
         <span class="term-cmd">python -m pricing.evaluate.validation --reps 20</span>
+        <button class="term-run" type="button" data-secs="3" data-elapsed="3s"></button>
       </div>
-      <pre>
+      <div class="term-prog" hidden><i></i></div>
+      <div class="term-idle"><span class="caret"></span><span class="idle-label"></span></div>
+      <pre hidden>
 Estimator recovery on synthetic data -- ENDOGENOUS pricing, 20 markets
 
         method  true_beta  mean_estimate   bias  rel_bias_pct   rmse  ci_coverage
@@ -345,6 +401,7 @@ Estimator recovery on synthetic data -- ENDOGENOUS pricing, 20 markets
 
 rel_bias_pct > 0 means the estimate is closer to zero than the truth,
 i.e. demand looks less price-sensitive than it really is.</pre>
+      <div class="term-foot" hidden></div>
     </div>
     <p class="term-note" data-i18n="run.na">2SLS recovers the written-down truth to within 0.008%, with 100% confidence-interval coverage. The other two never cover it. This is the claim CI re-runs on every push.</p>
 
@@ -353,8 +410,11 @@ i.e. demand looks less price-sensitive than it really is.</pre>
       <div class="term-bar">
         <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
         <span class="term-cmd">python -m pricing.pipeline --source olist</span>
+        <button class="term-run" type="button" data-secs="129" data-elapsed="2m 09s"></button>
       </div>
-      <pre>
+      <div class="term-prog" hidden><i></i></div>
+      <div class="term-idle"><span class="caret"></span><span class="idle-label"></span></div>
+      <pre hidden>
 Panel: 16,278 rows | 844 products | 88 weeks
 
 Portfolio-wide elasticity
@@ -389,6 +449,7 @@ Optimiser on 75 products across 3 categories (23% of panel revenue)
   guardrails on   [Optimal] margin 6,957 -> 7,483 <b>(+7.56%)</b>  |  revenue -1.04%  |  avg price +5.00%
   guardrails off  [Unconstrained] margin 6,957 -> 9,277 (+33.34%)  |  revenue -6.66%  |  avg price +30.00%
   <i>guardrails cost 25.79 pp of margin uplift</i></pre>
+      <div class="term-foot" hidden></div>
     </div>
     <p class="term-note" data-i18n="run.nb">Both gates fire in this single run: the instrument is rejected on its first-stage F, and 17 of 20 categories are refused a recommendation.</p>
 
@@ -397,8 +458,11 @@ Optimiser on 75 products across 3 categories (23% of panel revenue)
       <div class="term-bar">
         <span class="dot" style="background:#ff5f57"></span><span class="dot" style="background:#febc2e"></span><span class="dot" style="background:#28c840"></span>
         <span class="term-cmd">python -m pricing.demand.ml_forecast --folds 4</span>
+        <button class="term-run" type="button" data-secs="9" data-elapsed="9s"></button>
       </div>
-      <pre>
+      <div class="term-prog" hidden><i></i></div>
+      <div class="term-idle"><span class="caret"></span><span class="idle-label"></span></div>
+      <pre hidden>
 Panel: 16278 rows, 844 units, 88 weeks
 
 --- with history ---
@@ -414,6 +478,7 @@ persistence      0.6753   0.5538
 ridge            0.6726   0.5601
 gbm              0.4670   0.3477
 <i>implied elasticity from the GBM: -0.0504</i></pre>
+      <div class="term-foot" hidden></div>
     </div>
     <p class="term-note" data-i18n="run.nc">The tree cuts forecast error by 37% and still implies an elasticity less than half the credible one. Strip its memory of past demand and it reads &minus;0.05: naive OLS all over again, reached by a different model class.</p>
   </div>
@@ -441,7 +506,7 @@ gbm              0.4670   0.3477
         <h4 data-i18n="res.c2t">Elasticity by category, real Olist panel</h4>
         <div class="sub" data-i18n="res.c2s">Two-way fixed effects. A category is priced only below &minus;1.05 with |t| &gt; 2</div>
         <div class="legend">
-          <span><i style="background:#197A56"></i><span data-i18n="res.legOk">Credibly elastic &mdash; priced</span></span>
+          <span><i style="background:#197A56"></i><span data-i18n="res.legOk">Credibly elastic, priced</span></span>
           <span><i style="background:#C4B5A4"></i><span data-i18n="res.legNo">Refused</span></span>
         </div>
         <div id="c2"></div>
@@ -473,7 +538,7 @@ gbm              0.4670   0.3477
       <figure>
         <div class="chart">
           <h4 data-i18n="res.c5t">Forecast accuracy</h4>
-          <div class="sub" data-i18n="res.c5s">Held-out RMSE, expanding-window folds &mdash; lower is better</div>
+          <div class="sub" data-i18n="res.c5s">Held-out RMSE, expanding-window folds. Lower is better</div>
           <div id="c5"></div>
         </div>
         <figcaption data-i18n="res.c5c">Gradient boosting wins the forecasting job decisively.</figcaption>
@@ -490,7 +555,7 @@ gbm              0.4670   0.3477
 
     <div class="callout dark">
       <div class="lbl" data-i18n="res.findLbl">The finding worth the conversation</div>
-      <p data-i18n-html="res.findBody">The variant <em>with</em> demand history is the <strong>less</strong> biased of the two, which looks backwards until you notice what lagged demand is: a product's own recent sales encode its latent quality, so the lags absorb unit-level heterogeneity the way a fixed effect does &mdash; badly, but not by nothing. The features that make the model a good forecaster are the same ones that partially clean its elasticity. Neither effect was designed.</p>
+      <p data-i18n-html="res.findBody">The variant <em>with</em> demand history is the <strong>less</strong> biased of the two, which looks backwards until you notice what lagged demand is: a product's own recent sales encode its latent quality, so the lags absorb unit-level heterogeneity the way a fixed effect does. Badly, but not by nothing. The features that make the model a good forecaster are the same ones that partially clean its elasticity. Neither effect was designed.</p>
     </div>
   </div>
 </section>
@@ -501,12 +566,7 @@ gbm              0.4670   0.3477
     <div class="sec-kicker" data-i18n="lim.kicker">Limitations</div>
     <h2 data-i18n="lim.h2">What this does not establish</h2>
     <p class="intro" data-i18n="lim.intro">Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose boundary is known is worth more than one presented without it.</p>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th data-i18n="lim.thL">Limitation</th><th data-i18n="lim.thM">What it means for the result</th></tr></thead>
-        <tbody id="limBody"></tbody>
-      </table>
-    </div>
+    <div class="lims" id="limBody"></div>
   </div>
 </section>
 
@@ -539,19 +599,19 @@ const TRANSLATIONS = {
 
     "hero.kicker":"Causal inference · Optimization · Machine learning",
     "hero.title":"Price Optimization on Brazilian E-Commerce Data",
-    "hero.lede":"Estimating price elasticity from observational marketplace data, turning that estimate into a constrained price list &mdash; and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.",
+    "hero.lede":"Estimating price elasticity from observational marketplace data, turning that estimate into a constrained price list, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.",
     "hero.repo":"View the repository","hero.see":"See it run",
-    "hero.s1":"product-week observations","hero.s2":"categories priced &mdash; the rest refused",
+    "hero.s1":"product-week observations","hero.s2":"categories priced, the rest refused",
     "hero.s3":"margin uplift, guardrails respected","hero.s4":"tests, re-run by CI on every push",
 
     "problem.kicker":"The problem","problem.h2":"Price is not assigned at random",
     "problem.intro":"Two traps sit between a dataset and a price list. The first is statistical, the second is about decisions. Most analyses fall into both.",
-    "problem.t1h":"Trap 1 &mdash; the confound",
+    "problem.t1h":"Trap 1: the confound",
     "problem.t1a":"Suppose you record the price and the occupancy of a hundred restaurants. The expensive ones are fuller. Does raising prices fill a restaurant?",
     "problem.t1b":"Of course not. The expensive restaurant is expensive <em>because it is good</em>. You did not measure the effect of price; you measured the effect of quality, which was hiding behind price. The same thing happens to products: a seller charges more for exactly the items people want most.",
     "problem.calloutLbl":"The direction of the error is always the same",
-    "problem.calloutBody":"Demand looks <strong>less</strong> price-sensitive than it is. In business terms: raising prices looks safe when it is not. On the Olist data, naive OLS returns <code>&minus;0.002</code> &mdash; the effect is not shrunk, it is erased.",
-    "problem.t2h":"Trap 2 &mdash; an elasticity is not a price",
+    "problem.calloutBody":"Demand looks <strong>less</strong> price-sensitive than it is. In business terms: raising prices looks safe when it is not. On the Olist data, naive OLS returns <code>&minus;0.002</code>. The effect is not shrunk, it is erased.",
+    "problem.t2h":"Trap 2: an elasticity is not a price",
     "problem.t2a":"Suppose the elasticity is correct. The optimal price for one product in isolation is a textbook formula, and it is useless, because no pricing team moves one product alone. Real constraints couple the whole portfolio:",
     "problem.thGuard":"Guardrail","problem.thForbid":"What it forbids",
     "problem.g1":"Average price","problem.g1d":"Raising the portfolio's mean price beyond a cap",
@@ -566,7 +626,7 @@ const TRANSLATIONS = {
     "approach.s2h":"Validate","approach.s2p":"A synthetic market whose true elasticity is <strong>written before anything is fitted</strong>. On real data nobody can check &ldquo;my model says &minus;1.4&rdquo;. Here they can.",
     "approach.s3h":"Decide","approach.s3p":"A mixed-integer program picks one price per product under every guardrail at once. The output is a price list a team could execute, not a coefficient.",
     "approach.s4h":"Price the error","approach.s4p":"What the biased estimate costs in margin, and how fast the conclusion decays if the curve is wrong. The step that connects statistics to money.",
-    "approach.s5h":"Refuse","approach.s5p":"Two gates sit between an estimate and a price list, and <strong>on the real data both fire</strong>. <strong>77% of panel revenue gets no recommendation</strong> &mdash; the correct answer, not a gap to fill by lowering the bar.",
+    "approach.s5h":"Refuse","approach.s5p":"Two gates sit between an estimate and a price list, and <strong>on the real data both fire</strong>. <strong>77% of panel revenue gets no recommendation</strong>. That is the correct answer, not a gap to fill by lowering the bar.",
 
     "arch.kicker":"Architecture","arch.h2":"How the pieces connect",
     "arch.intro":"Two entry points feed the same chain: a synthetic market where the truth is known, and the real Olist CSVs. Every stage is a module that can be run and tested alone.",
@@ -577,7 +637,7 @@ const TRANSLATIONS = {
     "run.kicker":"Execution","run.h2":"What running it actually prints",
     "run.intro":"Every block below is real captured output from the commands as written, not a mockup. The numbers on this page and the numbers in the repository come from the same runs.",
     "run.h3a":"1. Validate the estimators against a known truth",
-    "run.pa":"No data download needed &mdash; the market is generated.",
+    "run.pa":"No data download needed: the market is generated.",
     "run.na":"2SLS recovers the written-down truth to within 0.008%, with 100% confidence-interval coverage. The other two never cover it. This is the claim CI re-runs on every push.",
     "run.h3b":"2. Run the whole chain on the real Olist data",
     "run.nb":"Both gates fire in this single run: the instrument is rejected on its first-stage F, and 17 of 20 categories are refused a recommendation.",
@@ -590,23 +650,26 @@ const TRANSLATIONS = {
     "res.c1c":"Every bar that stops short of the dashed line understates how much demand reacts to price. Only 2SLS reaches it, and only 2SLS ever covers the truth with its confidence interval.",
     "res.h3b":"On the real data, which categories can be priced at all?",
     "res.c2t":"Elasticity by category, real Olist panel","res.c2s":"Two-way fixed effects. A category is priced only below &minus;1.05 with |t| &gt; 2",
-    "res.legOk":"Credibly elastic &mdash; priced","res.legNo":"Refused",
+    "res.legOk":"Credibly elastic, priced","res.legNo":"Refused",
     "res.c2c":"Seventeen categories sit above the threshold or carry an interval too wide to act on. Two are estimated with the wrong sign entirely. The pipeline prices the three on the left and declines the rest.",
     "res.c3t":"What the guardrails cost","res.c3s":"Margin uplift under each policy",
     "res.c3c":"Removing the guardrails more than quadruples the uplift, by raising the average price 30% and shedding 28% of volume. The policy is the decision.",
     "res.c4t":"The margin assumption drives the size","res.c4s":"Olist records no cost, so this must be assumed",
     "res.c4c":"The uplift ranges from +17.5% to +2.2% depending on an assumption the data cannot supply. The direction is robust; the magnitude is not. This is the project's biggest weakness, and it is stated in the README as a table.",
     "res.h3c":"The best forecaster is the worst pricing model",
-    "res.c5t":"Forecast accuracy","res.c5s":"Held-out RMSE, expanding-window folds &mdash; lower is better",
+    "res.c5t":"Forecast accuracy","res.c5s":"Held-out RMSE, expanding-window folds. Lower is better",
     "res.c5c":"Gradient boosting wins the forecasting job decisively.",
     "res.c6t":"The elasticity each model implies","res.c6s":"Probed by holding all else fixed and moving price",
     "res.c6c":"And loses the pricing job just as decisively.",
     "res.findLbl":"The finding worth the conversation",
-    "res.findBody":"The variant <em>with</em> demand history is the <strong>less</strong> biased of the two, which looks backwards until you notice what lagged demand is: a product's own recent sales encode its latent quality, so the lags absorb unit-level heterogeneity the way a fixed effect does &mdash; badly, but not by nothing. The features that make the model a good forecaster are the same ones that partially clean its elasticity. Neither effect was designed.",
+    "res.findBody":"The variant <em>with</em> demand history is the <strong>less</strong> biased of the two, which looks backwards until you notice what lagged demand is: a product's own recent sales encode its latent quality, so the lags absorb unit-level heterogeneity the way a fixed effect does. Badly, but not by nothing. The features that make the model a good forecaster are the same ones that partially clean its elasticity. Neither effect was designed.",
 
     "lim.kicker":"Limitations","lim.h2":"What this does not establish",
     "lim.intro":"Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose boundary is known is worth more than one presented without it.",
-    "lim.thL":"Limitation","lim.thM":"What it means for the result",
+    "lim.fixLbl":"What would close it",
+    "term.run":"Run","term.running":"running","term.again":"Run again",
+    "term.idle":"output hidden until you run it",
+    "term.foot":"real run on the author’s machine:",
 
     "foot.by":"Built by Enzo Bernardo &middot; MIT licensed","foot.repo":"Repository",
 
@@ -614,7 +677,7 @@ const TRANSLATIONS = {
       ["config.py","Paths, guardrail defaults, panel parameters, the random seed","One place to change a policy constant, so no threshold is buried in logic"],
       ["synth.py","Generates a market with a <strong>known</strong> elasticity and a tunable endogeneity knob","The backbone of validation: turning the confound off must remove the bias"],
       ["data.py","Nine Olist CSVs into a product&times;week panel, plus the cost instrument","Isolates every real-data assumption in one readable place"],
-      ["elasticity/loglog_fe.py","Pooled OLS, two-way fixed effects, 2SLS &mdash; all with clustered standard errors","Three assumptions about price formation, three answers to compare"],
+      ["elasticity/loglog_fe.py","Pooled OLS, two-way fixed effects and 2SLS, all with clustered standard errors","Three assumptions about price formation, three answers to compare"],
       ["demand/ml_forecast.py","Gradient-boosted forecaster, expanding-window CV, and an elasticity probe","Answers &ldquo;why not just use ML?&rdquo; with a fitted model instead of an opinion"],
       ["demand/review_nlp.py","Review text into a product-quality signal, separated from delivery experience","A star rating conflates the product with the courier; only text can split them"],
       ["optimize/milp.py","Price-grid MILP with the portfolio guardrails","Turns an elasticity into an executable price list"],
@@ -623,12 +686,12 @@ const TRANSLATIONS = {
       ["pipeline.py","End-to-end run: estimate, gate, optimize, score","The single command that produces everything shown here"]
     ],
     "limits":[
-      ["Olist records no cost","The size of the uplift follows the assumed gross margin: +17.5% at 20%, +2.2% at 60%. The direction survives; the magnitude is an assumption."],
-      ["No counterfactual","Nobody re-ran 2017 at different prices. The uplift is what the estimated curve implies, not a measured outcome."],
-      ["Causal identification does not fully hold on real data","With the instrument rejected, fixed effects carry the claim &mdash; which assumes weekly price moves are not driven by demand. That is a hypothesis. The synthetic experiment measures exactly how much bias survives when it fails: +16.0%."],
-      ["Constant elasticity","No reference-price effects, no psychological thresholds, no asymmetry between raising and cutting price."],
-      ["Products treated as independent","Cannibalisation between substitutes is not modelled, which overstates the gain from raising one item's price."],
-      ["The panel is a slice","Of 32,216 products, 844 have 12+ weeks of history. Conclusions apply to products with turnover, not to the whole marketplace."]
+      ["Olist records no cost","The size of the uplift follows the assumed gross margin: +17.5% at 20%, +2.2% at 60%. The direction survives; the magnitude is an assumption.","Join a category-level cost or take-rate table, even an industry benchmark, and report the uplift per cost band instead of picking one. The optimiser itself needs no change: the margin term is already a parameter."],
+      ["No counterfactual","Nobody re-ran 2017 at different prices. The uplift is what the estimated curve implies, not a measured outcome.","The honest fix is a switchback test: randomise price within the allowed band by product-week, then read the elasticity off assignment rather than off history. Two weeks of that would replace every assumption here."],
+      ["Causal identification does not fully hold on real data","With the instrument rejected, fixed effects carry the claim, and that assumes weekly price moves are not driven by demand. That is a hypothesis. The synthetic experiment measures exactly how much bias survives when it fails: +16.0%.","Find an instrument with within-product variation the cost index does not have: a freight-table revision, a supplier price change, a tax rule that hits some states and not others. The rejection gate already tells us when a candidate is strong enough."],
+      ["Constant elasticity","No reference-price effects, no psychological thresholds, no asymmetry between raising and cutting price.","Estimate a piecewise or spline demand curve and let the MILP consume it. The optimiser already works over a discrete price grid, so a non-parametric curve drops in without touching the constraints."],
+      ["Products treated as independent","Cannibalisation between substitutes is not modelled, which overstates the gain from raising one item's price.","Group products into substitution clusters using the review-text embeddings already in the repository, estimate cross-price terms inside a cluster, and add a cluster-level volume constraint to the MILP."],
+      ["The panel is a slice","Of 32,216 products, 844 have 12+ weeks of history. Conclusions apply to products with turnover, not to the whole marketplace.","Pool the long tail hierarchically: shrink each product's elasticity toward its category mean, so a product with four weeks borrows strength instead of being dropped. That is a Bayesian hierarchical model over the same panel."]
     ]
   },
 
@@ -638,19 +701,19 @@ const TRANSLATIONS = {
 
     "hero.kicker":"Inferência causal · Otimização · Aprendizado de máquina",
     "hero.title":"Otimização de Preço em Dados Reais de E-commerce",
-    "hero.lede":"Estimar a elasticidade-preço a partir de dados observacionais de marketplace, transformar essa estimativa numa lista de preços com restrições &mdash; e deixar o pipeline <strong>se recusar a responder</strong> onde o dado não sustenta uma resposta.",
+    "hero.lede":"Estimar a elasticidade-preço a partir de dados observacionais de marketplace, transformar essa estimativa numa lista de preços com restrições, e deixar o pipeline <strong>se recusar a responder</strong> onde o dado não sustenta uma resposta.",
     "hero.repo":"Ver o repositório","hero.see":"Ver rodando",
-    "hero.s1":"observações produto-semana","hero.s2":"categorias precificadas &mdash; o resto recusado",
+    "hero.s1":"observações produto-semana","hero.s2":"categorias precificadas, o resto recusado",
     "hero.s3":"de ganho de margem, respeitando as travas","hero.s4":"testes, reexecutados pelo CI a cada push",
 
     "problem.kicker":"O problema","problem.h2":"Preço não é sorteado",
     "problem.intro":"Duas armadilhas separam um conjunto de dados de uma lista de preços. A primeira é estatística, a segunda é de decisão. A maioria das análises cai nas duas.",
-    "problem.t1h":"Armadilha 1 &mdash; o confundimento",
+    "problem.t1h":"Armadilha 1: o confundimento",
     "problem.t1a":"Suponha que você anote o preço e a lotação de cem restaurantes. Os mais caros estão mais cheios. Subir preço enche um restaurante?",
     "problem.t1b":"Claro que não. O restaurante caro é caro <em>porque é bom</em>. Você não mediu o efeito do preço; mediu o efeito da qualidade, que estava escondida atrás do preço. O mesmo acontece com produto: o vendedor cobra mais caro exatamente pelos itens que as pessoas mais querem.",
     "problem.calloutLbl":"A direção do erro é sempre a mesma",
-    "problem.calloutBody":"A demanda parece <strong>menos</strong> sensível a preço do que é. Em termos de negócio: subir preço parece seguro quando não é. No dado do Olist, o OLS ingênuo devolve <code>&minus;0,002</code> &mdash; o efeito não é reduzido, é apagado.",
-    "problem.t2h":"Armadilha 2 &mdash; uma elasticidade não é um preço",
+    "problem.calloutBody":"A demanda parece <strong>menos</strong> sensível a preço do que é. Em termos de negócio: subir preço parece seguro quando não é. No dado do Olist, o OLS ingênuo devolve <code>&minus;0,002</code>. O efeito não é reduzido, é apagado.",
+    "problem.t2h":"Armadilha 2: uma elasticidade não é um preço",
     "problem.t2a":"Suponha que a elasticidade esteja certa. O preço ótimo de um produto isolado é fórmula de manual, e é inútil, porque nenhum time de pricing move um produto sozinho. As restrições reais acoplam a carteira inteira:",
     "problem.thGuard":"Trava","problem.thForbid":"O que ela impede",
     "problem.g1":"Preço médio","problem.g1d":"Subir o preço médio da carteira acima de um teto",
@@ -665,7 +728,7 @@ const TRANSLATIONS = {
     "approach.s2h":"Validar","approach.s2p":"Um mercado sintético cuja elasticidade verdadeira é <strong>escrita antes de qualquer estimação</strong>. No dado real ninguém confere &ldquo;meu modelo deu &minus;1,4&rdquo;. Aqui confere.",
     "approach.s3h":"Decidir","approach.s3p":"Um programa inteiro misto escolhe um preço por produto sob todas as travas ao mesmo tempo. A saída é uma lista executável, não um coeficiente.",
     "approach.s4h":"Precificar o erro","approach.s4p":"Quanto a estimativa enviesada custa em margem, e com que velocidade a conclusão se degrada se a curva estiver errada. O passo que liga estatística a dinheiro.",
-    "approach.s5h":"Recusar","approach.s5p":"Dois portões separam uma estimativa de uma lista de preços, e <strong>no dado real os dois disparam</strong>. <strong>77% da receita do painel não recebe recomendação</strong> &mdash; a resposta certa, não uma lacuna a tapar baixando a régua.",
+    "approach.s5h":"Recusar","approach.s5p":"Dois portões separam uma estimativa de uma lista de preços, e <strong>no dado real os dois disparam</strong>. <strong>77% da receita do painel não recebe recomendação</strong>. Essa é a resposta certa, não uma lacuna a tapar baixando a régua.",
 
     "arch.kicker":"Arquitetura","arch.h2":"Como as peças se conectam",
     "arch.intro":"Dois pontos de entrada alimentam a mesma cadeia: um mercado sintético onde a verdade é conhecida, e os CSVs reais do Olist. Cada estágio é um módulo que roda e é testado sozinho.",
@@ -676,7 +739,7 @@ const TRANSLATIONS = {
     "run.kicker":"Execução","run.h2":"O que rodar de verdade imprime",
     "run.intro":"Todo bloco abaixo é saída real capturada dos comandos como estão escritos, não maquete. Os números desta página e os do repositório vêm das mesmas execuções.",
     "run.h3a":"1. Validar os estimadores contra uma verdade conhecida",
-    "run.pa":"Não precisa baixar dado &mdash; o mercado é gerado.",
+    "run.pa":"Não precisa baixar dado: o mercado é gerado.",
     "run.na":"O 2SLS recupera a verdade escrita com erro de 0,008%, e cobre o valor verdadeiro em 100% dos intervalos. Os outros dois nunca cobrem. Esta é a alegação que o CI reexecuta a cada push.",
     "run.h3b":"2. Rodar a cadeia inteira no dado real do Olist",
     "run.nb":"Os dois portões disparam nesta única execução: o instrumento é rejeitado pelo F de primeiro estágio, e 17 de 20 categorias ficam sem recomendação.",
@@ -689,23 +752,26 @@ const TRANSLATIONS = {
     "res.c1c":"Toda barra que para antes da linha tracejada subestima o quanto a demanda reage a preço. Só o 2SLS a alcança, e só ele cobre a verdade com seu intervalo de confiança.",
     "res.h3b":"No dado real, quais categorias podem ser precificadas?",
     "res.c2t":"Elasticidade por categoria, painel real do Olist","res.c2s":"Efeitos fixos de dupla via. Uma categoria só é precificada abaixo de &minus;1,05 com |t| &gt; 2",
-    "res.legOk":"Comprovadamente elástica &mdash; precificada","res.legNo":"Recusada",
+    "res.legOk":"Comprovadamente elástica, precificada","res.legNo":"Recusada",
     "res.c2c":"Dezessete categorias ficam acima do limiar ou carregam um intervalo largo demais para agir. Duas são estimadas com o sinal trocado. O pipeline precifica as três da esquerda e recusa o resto.",
     "res.c3t":"Quanto custam as travas","res.c3s":"Ganho de margem sob cada política",
     "res.c3c":"Tirar as travas mais que quadruplica o ganho, subindo o preço médio em 30% e perdendo 28% do volume. A política é a decisão.",
     "res.c4t":"A hipótese de margem comanda o tamanho","res.c4s":"O Olist não registra custo, então isso precisa ser assumido",
     "res.c4c":"O ganho vai de +17,5% a +2,2% conforme uma hipótese que o dado não pode fornecer. A direção é robusta; o tamanho não. É a maior fraqueza do projeto, e está declarada no README em tabela.",
     "res.h3c":"O melhor previsor é o pior modelo de precificação",
-    "res.c5t":"Acurácia de previsão","res.c5s":"RMSE fora da amostra, janelas expansivas &mdash; menor é melhor",
+    "res.c5t":"Acurácia de previsão","res.c5s":"RMSE fora da amostra, janelas expansivas. Menor é melhor",
     "res.c5c":"O gradient boosting ganha o trabalho de previsão com folga.",
     "res.c6t":"A elasticidade que cada modelo implica","res.c6s":"Sondada mantendo tudo fixo e movendo o preço",
     "res.c6c":"E perde o trabalho de precificação com a mesma folga.",
     "res.findLbl":"O achado que vale a conversa",
-    "res.findBody":"A variante <em>com</em> histórico de demanda é a <strong>menos</strong> enviesada das duas, o que parece invertido até você notar o que a demanda defasada é: as vendas recentes do próprio produto carregam a qualidade latente dele, então as defasagens absorvem a heterogeneidade entre unidades como um efeito fixo faria &mdash; mal, mas não por nada. Os atributos que fazem o modelo prever bem são os mesmos que limpam parcialmente a elasticidade dele. Nenhum dos dois efeitos foi projetado.",
+    "res.findBody":"A variante <em>com</em> histórico de demanda é a <strong>menos</strong> enviesada das duas, o que parece invertido até você notar o que a demanda defasada é: as vendas recentes do próprio produto carregam a qualidade latente dele, então as defasagens absorvem a heterogeneidade entre unidades como um efeito fixo faria. Mal, mas não por nada. Os atributos que fazem o modelo prever bem são os mesmos que limpam parcialmente a elasticidade dele. Nenhum dos dois efeitos foi projetado.",
 
     "lim.kicker":"Limitações","lim.h2":"O que isto não estabelece",
     "lim.intro":"Quem for auditar o projeto vai apertar em um destes pontos. Estão aqui pelo mesmo motivo que estão no README: um resultado cuja fronteira é conhecida vale mais que um apresentado sem ela.",
-    "lim.thL":"Limitação","lim.thM":"O que significa para o resultado",
+    "lim.fixLbl":"O que resolveria",
+    "term.run":"Rodar","term.running":"rodando","term.again":"Rodar de novo",
+    "term.idle":"saída escondida até você rodar",
+    "term.foot":"execução real na máquina do autor:",
 
     "foot.by":"Feito por Enzo Bernardo &middot; licença MIT","foot.repo":"Repositório",
 
@@ -713,7 +779,7 @@ const TRANSLATIONS = {
       ["config.py","Caminhos, padrões das travas, parâmetros do painel, a semente aleatória","Um só lugar para mudar uma constante de política, sem limiar enterrado na lógica"],
       ["synth.py","Gera um mercado com elasticidade <strong>conhecida</strong> e um botão de endogeneidade ajustável","A espinha da validação: desligar o confundimento tem que remover o viés"],
       ["data.py","Nove CSVs do Olist viram um painel produto&times;semana, mais o instrumento de custo","Isola toda hipótese sobre o dado real num lugar legível"],
-      ["elasticity/loglog_fe.py","OLS agrupado, efeitos fixos de dupla via, 2SLS &mdash; todos com erros-padrão agrupados","Três hipóteses sobre a formação do preço, três respostas para comparar"],
+      ["elasticity/loglog_fe.py","OLS agrupado, OLS agrupado, efeitos fixos de dupla via e 2SLS, todos com erros-padrão agrupados","Três hipóteses sobre a formação do preço, três respostas para comparar"],
       ["demand/ml_forecast.py","Previsor com gradient boosting, validação em janela expansiva e sonda de elasticidade","Responde &ldquo;por que não usar ML?&rdquo; com um modelo ajustado em vez de opinião"],
       ["demand/review_nlp.py","Texto da avaliação vira sinal de qualidade do produto, separado da entrega","A nota em estrelas mistura o produto com a transportadora; só o texto separa"],
       ["optimize/milp.py","MILP sobre grade de preços com as travas de carteira","Transforma uma elasticidade numa lista de preços executável"],
@@ -722,12 +788,12 @@ const TRANSLATIONS = {
       ["pipeline.py","Execução ponta a ponta: estimar, filtrar, otimizar, avaliar","O único comando que produz tudo que está mostrado aqui"]
     ],
     "limits":[
-      ["O Olist não registra custo","O tamanho do ganho segue a margem bruta assumida: +17,5% a 20%, +2,2% a 60%. A direção sobrevive; o tamanho é uma hipótese."],
-      ["Não existe contrafactual","Ninguém rerrodou 2017 com outros preços. O ganho é o que a curva estimada implica, não um resultado medido."],
-      ["A identificação causal não se sustenta por completo no dado real","Com o instrumento rejeitado, os efeitos fixos carregam a alegação &mdash; e eles assumem que as variações semanais de preço não são puxadas pela demanda. Isso é hipótese. O experimento sintético mede exatamente quanto viés sobrevive quando ela falha: +16,0%."],
-      ["Elasticidade constante","Sem efeito de preço de referência, sem limiares psicológicos, sem assimetria entre subir e baixar preço."],
-      ["Produtos tratados como independentes","Canibalização entre substitutos não é modelada, o que superestima o ganho de subir o preço de um item."],
-      ["O painel é um recorte","De 32.216 produtos, 844 têm 12+ semanas de histórico. As conclusões valem para produtos com giro, não para o marketplace inteiro."]
+      ["O Olist não registra custo","O tamanho do ganho segue a margem bruta assumida: +17,5% a 20%, +2,2% a 60%. A direção sobrevive; o tamanho é uma hipótese.","Cruzar com uma tabela de custo ou take-rate por categoria, mesmo um benchmark de mercado, e reportar o ganho por faixa de custo em vez de escolher uma. O otimizador não muda: o termo de margem já é um parâmetro."],
+      ["Não existe contrafactual","Ninguém rerrodou 2017 com outros preços. O ganho é o que a curva estimada implica, não um resultado medido.","O conserto honesto é um teste switchback: sortear o preço dentro da banda permitida por produto-semana e ler a elasticidade da atribuição, não do histórico. Duas semanas disso substituiriam todas as hipóteses daqui."],
+      ["A identificação causal não se sustenta por completo no dado real","Com o instrumento rejeitado, os efeitos fixos carregam a alegação, e eles assumem que as variações semanais de preço não são puxadas pela demanda. Isso é hipótese. O experimento sintético mede exatamente quanto viés sobrevive quando ela falha: +16,0%.","Buscar um instrumento com variação dentro do produto que o índice de custo não tem: revisão de tabela de frete, mudança de preço de fornecedor, regra tributária que atinge alguns estados e outros não. O portão de rejeição já diz quando um candidato é forte o bastante."],
+      ["Elasticidade constante","Sem efeito de preço de referência, sem limiares psicológicos, sem assimetria entre subir e baixar preço.","Estimar uma curva de demanda por partes ou com splines e deixar o MILP consumi-la. O otimizador já trabalha sobre uma grade discreta de preços, então uma curva não paramétrica entra sem tocar nas restrições."],
+      ["Produtos tratados como independentes","Canibalização entre substitutos não é modelada, o que superestima o ganho de subir o preço de um item.","Agrupar produtos em clusters de substituição usando os embeddings de texto das avaliações que já estão no repositório, estimar termos de preço cruzado dentro do cluster e adicionar uma restrição de volume por cluster no MILP."],
+      ["O painel é um recorte","De 32.216 produtos, 844 têm 12+ semanas de histórico. As conclusões valem para produtos com giro, não para o marketplace inteiro.","Agrupar a cauda longa de forma hierárquica: encolher a elasticidade de cada produto na direção da média da categoria, para que um produto com quatro semanas tome emprestada força em vez de ser descartado. É um modelo hierárquico bayesiano sobre o mesmo painel."]
     ]
   }
 };
@@ -756,7 +822,8 @@ function renderRows() {
   document.getElementById("filesBody").innerHTML = t("files")
     .map(([f, r, w]) => `<tr><td><code>${f}</code></td><td>${r}</td><td>${w}</td></tr>`).join("");
   document.getElementById("limBody").innerHTML = t("limits")
-    .map(([l, m]) => `<tr><td><strong>${l}</strong></td><td>${m}</td></tr>`).join("");
+    .map(([l, m, fix]) => `<div class="lim"><h4>${l}</h4><p>${m}</p>` +
+      `<div class="fix"><b>${t("lim.fixLbl")}</b>${fix}</div></div>`).join("");
 }
 
 function applyLanguage() {
@@ -765,6 +832,7 @@ function applyLanguage() {
   document.querySelectorAll("[data-i18n-html]").forEach(n => { n.innerHTML = t(n.dataset.i18nHtml); });
   renderRows();
   drawArch();
+  labelTerminals();
   document.querySelectorAll(".language-switcher__button").forEach(b => {
     const on = b.dataset.lang === language;
     b.classList.toggle("is-active", on);
@@ -788,6 +856,60 @@ function applyLanguage() {
     box.appendChild(b);
   });
 })();
+
+/* ---------------------------------------------------------------- terminals
+   The page is static, so nothing is executed here: each block holds the real
+   output captured from that command, revealed on demand instead of dumped on
+   arrival. The elapsed time shown afterwards is the command's true runtime,
+   measured on the machine that produced the output. */
+function labelTerminals() {
+  document.querySelectorAll(".term").forEach(term => {
+    const btn = term.querySelector(".term-run");
+    const idle = term.querySelector(".idle-label");
+    const foot = term.querySelector(".term-foot");
+    if (!btn) return;
+    btn.textContent = btn.dataset.done ? t("term.again") : t("term.run");
+    if (idle) idle.textContent = t("term.idle");
+    if (foot && btn.dataset.done) foot.textContent = t("term.foot") + " " + btn.dataset.elapsed;
+  });
+}
+
+document.querySelectorAll(".term").forEach(term => {
+  const btn = term.querySelector(".term-run");
+  if (!btn) return;
+  const pre = term.querySelector("pre");
+  const idle = term.querySelector(".term-idle");
+  const prog = term.querySelector(".term-prog");
+  const bar = prog.querySelector("i");
+  const foot = term.querySelector(".term-foot");
+
+  btn.addEventListener("click", () => {
+    if (btn.disabled) return;
+    btn.disabled = true;
+    btn.textContent = t("term.running");
+    prog.hidden = false;
+    bar.style.width = "0";
+
+    // A short, fixed sweep: the point is the reveal, not a fake wait
+    // proportional to a two-minute pipeline run.
+    const DURATION = 900;
+    const start = performance.now();
+    const step = (now) => {
+      const k = Math.min((now - start) / DURATION, 1);
+      bar.style.width = (k * 100).toFixed(1) + "%";
+      if (k < 1) return requestAnimationFrame(step);
+      prog.hidden = true;
+      idle.hidden = true;
+      pre.hidden = false;
+      foot.hidden = false;
+      foot.textContent = t("term.foot") + " " + btn.dataset.elapsed;
+      btn.dataset.done = "1";
+      btn.disabled = false;
+      btn.textContent = t("term.again");
+    };
+    requestAnimationFrame(step);
+  });
+});
 
 /* ================================================================ charts */
 const NS = "http://www.w3.org/2000/svg";
