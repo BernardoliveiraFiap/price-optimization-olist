@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements-dev.txt
+      - run: ruff check src tests
+      - run: pytest
+      # The synthetic validation is cheap and is the claim the README makes,
+      # so CI re-proves it on every push instead of trusting a pasted table.
+      - run: python -m pricing.evaluate.validation --reps 5
+        env:
+          PYTHONPATH: src
