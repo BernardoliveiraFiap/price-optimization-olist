@@ -68,6 +68,10 @@ class SynthParams:
     seasonal_amp: float = 0.25
     trend_per_year: float = 0.10
 
+    # Demand level is calibrated to this median so the panel sits in a
+    # plausible units-per-week range. Level only -- the slope is untouched.
+    target_median_units: float = 25.0
+
 
     seed: int = RANDOM_SEED
     category_names: tuple[str, ...] = field(
@@ -138,8 +142,7 @@ def make_panel(params: SynthParams | None = None) -> tuple[pd.DataFrame, dict]:
 
     # --- demand -----------------------------------------------------------
     alpha = (                                        # baseline unit popularity
-        1.6
-        + p.quality_on_demand * quality
+        p.quality_on_demand * quality
         + rng.normal(0.0, 0.35, size=n)[:, None]
     )
     week_idx = np.arange(t)[None, :]
@@ -161,6 +164,12 @@ def make_panel(params: SynthParams | None = None) -> tuple[pd.DataFrame, dict]:
         + xi
         + rng.normal(0.0, p.demand_noise_sd, size=(n, t))
     )
+    # With beta around -2 and prices around R$ 50, the intercept has to be
+    # calibrated or demand lands at ~0.002 units/week. Shifting the whole
+    # surface only moves the level, never the slope, so the true elasticity is
+    # untouched.
+    log_q = log_q + (np.log(p.target_median_units) - np.median(log_q))
+
     dates = pd.date_range("2017-01-02", periods=t, freq="W-MON")
     panel = pd.DataFrame(
         {
