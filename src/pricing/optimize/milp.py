@@ -248,7 +248,6 @@ def optimise_prices(
         "price_change_pct",
         "units_before",
         "units_after",
-        "unit_cost",
         "elasticity",
         "cand_revenue",
         "cand_margin",
@@ -259,4 +258,57 @@ def optimise_prices(
         prices=chosen[keep].sort_values("unit_id").reset_index(drop=True),
         summary=summary,
         status=status,
+    )
+
+
+def optimise_unconstrained(
+    products: pd.DataFrame, config: OptimisationConfig | None = None
+) -> OptimisationResult:
+    """Greedy per-product optimum, ignoring the portfolio guardrails.
+
+    Useful as an upper bound: the gap against :func:`optimise_prices` is the
+    price the business pays for its own guardrails, which is a number a
+    pricing owner can actually argue about.
+    """
+    cfg = config or OptimisationConfig()
+    grid = build_price_grid(products, cfg)
+    base = _baseline(products, cfg)
+
+    best = grid.loc[grid.groupby("unit_id")["cand_margin"].idxmax()].copy()
+    best = best.rename(
+        columns={
+            "price": "price_before",
+            "units": "units_before",
+            "cand_price": "price_after",
+            "cand_units": "units_after",
+        }
+    )
+    best["price_change_pct"] = 100.0 * best["delta"]
+
+    summary = {
+        "status": "Unconstrained",
+        "n_products": int(len(products)),
+        "revenue_baseline": base["revenue"],
+        "revenue_optimised": float(best["cand_revenue"].sum()),
+        "margin_baseline": base["margin"],
+        "margin_optimised": float(best["cand_margin"].sum()),
+        "units_baseline": base["units"],
+        "units_optimised": float(best["units_after"].sum()),
+    }
+    summary["margin_uplift_pct"] = 100.0 * (
+        summary["margin_optimised"] / summary["margin_baseline"] - 1.0
+    )
+    summary["revenue_uplift_pct"] = 100.0 * (
+        summary["revenue_optimised"] / summary["revenue_baseline"] - 1.0
+    )
+    summary["volume_change_pct"] = 100.0 * (
+        summary["units_optimised"] / summary["units_baseline"] - 1.0
+    )
+    summary["avg_price_change_pct"] = 100.0 * float(
+        (best["delta"].to_numpy() * base["revenue_weights"]).sum()
+    )
+    return OptimisationResult(
+        prices=best.sort_values("unit_id").reset_index(drop=True),
+        summary=summary,
+        status="Unconstrained",
     )
