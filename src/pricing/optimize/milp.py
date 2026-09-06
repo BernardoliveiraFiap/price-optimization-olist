@@ -248,6 +248,7 @@ def optimise_prices(
         "price_change_pct",
         "units_before",
         "units_after",
+        "unit_cost",
         "elasticity",
         "cand_revenue",
         "cand_margin",

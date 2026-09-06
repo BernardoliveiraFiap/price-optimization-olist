@@ -38,14 +38,17 @@ class SynthParams:
     n_weeks: int = 104
     n_categories: int = 6
 
-    # True elasticity per category, drawn in this range (always negative).
-    elasticity_range: tuple[float, float] = (-2.6, -0.9)
-    # Latent product quality: the classic omitted variable. It lifts both
-    # willingness to pay and the price a seller can charge, and it is
-    # time-invariant -- so a product fixed effect removes it and pooled OLS
-    # cannot.
-    quality_on_demand: float = 0.70
-    quality_on_price: float = 0.50
+    # True elasticity per category. Kept below -1.2: with |beta| <= 1 the
+    # constant-elasticity margin has no interior optimum, so "optimal price"
+    # would be undefined.
+    elasticity_range: tuple[float, float] = (-2.8, -1.3)
+
+    # Sellers are near-optimal but imperfect. Unit cost is anchored to the
+    # textbook markup rule and then perturbed, so some products end up
+    # overpriced and others underpriced -- which is where the money is. With
+    # cost assumed flat instead, every product sits below its optimum and the
+    # optimiser degenerates into "raise everything until the guardrail binds".
+    mispricing_sd: float = 0.18
 
     # Latent demand shock: AR(1) persistence and innovation scale.
     xi_rho: float = 0.55
@@ -54,6 +57,13 @@ class SynthParams:
     # Cost shifter (instrument): AR(1).
     cost_rho: float = 0.70
     cost_sd: float = 0.30
+
+    # Latent product quality: the classic omitted variable. It lifts both
+    # willingness to pay and the price a seller can charge, and it is
+    # time-invariant -- so a product fixed effect removes it and pooled OLS
+    # cannot.
+    quality_on_demand: float = 0.70
+    quality_on_price: float = 0.50
 
     # Pricing rule. Week-to-week price moves are mostly cost- and
     # promotion-driven, with a smaller demand-chasing component -- the usual
@@ -71,7 +81,6 @@ class SynthParams:
     # Demand level is calibrated to this median so the panel sits in a
     # plausible units-per-week range. Level only -- the slope is untouched.
     target_median_units: float = 25.0
-
 
     seed: int = RANDOM_SEED
     category_names: tuple[str, ...] = field(
@@ -170,6 +179,17 @@ def make_panel(params: SynthParams | None = None) -> tuple[pd.DataFrame, dict]:
     # untouched.
     log_q = log_q + (np.log(p.target_median_units) - np.median(log_q))
 
+    # --- unit cost --------------------------------------------------------
+    # Textbook constant-elasticity markup: p* = c * beta / (1 + beta), so a
+    # seller sitting exactly on its optimum implies c = p * (1 + beta) / beta.
+    # The lognormal perturbation is the mispricing the optimiser exists to fix.
+    markup_cost = np.exp(log_base_price).ravel() * (
+        (1.0 + beta_unit) / beta_unit
+    )
+    unit_cost = markup_cost * np.exp(
+        rng.normal(0.0, p.mispricing_sd, size=n)
+    )
+
     dates = pd.date_range("2017-01-02", periods=t, freq="W-MON")
     panel = pd.DataFrame(
         {
@@ -183,6 +203,7 @@ def make_panel(params: SynthParams | None = None) -> tuple[pd.DataFrame, dict]:
             "freight": freight.ravel(),
             "competition": competition.ravel(),
             "review_score": np.repeat(review_score.ravel(), t),
+            "unit_cost": np.repeat(unit_cost, t),
             # Observed cost shifter, usable as an instrument.
             "cost_index": cost.ravel(),
             # Kept only for diagnostics/tests; never fed to an estimator.
