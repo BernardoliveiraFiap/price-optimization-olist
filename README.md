@@ -132,6 +132,20 @@ source .venv/bin/activate
 pip install -r requirements-dev.txt
 ```
 
+`torch` is pulled from the default index by the commands above. On Linux that
+means the CUDA build; for a CPU-only machine install it explicitly first:
+
+```bash
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+```
+
+Encoding real review text also needs `sentence-transformers`, which is kept out
+of the pinned requirements because nothing else in the project depends on it:
+
+```bash
+pip install sentence-transformers
+```
+
 The real-data path additionally needs the
 [Brazilian E-Commerce Public Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce)
 extracted into `data/raw/`. Everything else runs without any download.
