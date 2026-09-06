@@ -69,6 +69,31 @@ The first two rows do not bind: the margin-optimal reallocation already
 respects the standard guardrails. They only cost money once the business also
 demands volume growth, which is the trade a pricing owner negotiates over.
 
+### Does the review model separate what the star rating conflates?
+
+Run on a hand-written sample of 40 Portuguese marketplace reviews
+(`python -m pricing.demand.demo_reviews`):
+
+| Product | Star average | Quality signal | Shift |
+|---|---|---|---|
+| Good product, terrible logistics | 3.17 | **4.63** | +1.46 |
+| Fast delivery, bad product | 2.67 | **1.57** | -1.10 |
+| Good on both | 4.75 | 4.57 | -0.18 |
+| Bad on both | 1.38 | 1.50 | +0.13 |
+
+A product whose bad ratings are mostly about the courier scores more than a
+star higher than its raw average; one whose complaints are about the item does
+not move. Only the second kind should shift willingness to pay.
+
+The keyword lexicons label 22 of the 40 reviews. The number that matters is
+what happens on the 10 that match **neither** lexicon, are therefore absent
+from training, and could never be handled by a rule: the heads get **9 of 10**
+right, including "ainda nao recebi meu pedido" (delivery, 0.98) and "o plastico
+e muito fino, sensacao de barato" (product, 1.00). The single miss is
+"desmontou na primeira semana de uso", read as delivery. That gap between the
+lexicon and the embedding is the argument for using a language model here
+instead of a regex.
+
 ### Is the conclusion robust?
 
 The same price list, re-scored against elasticities scaled from 0.6x to 1.4x:
@@ -102,12 +127,13 @@ src/pricing/
     loglog_fe.py             pooled OLS, two-way FE, 2SLS with clustered SEs
   demand/
     review_nlp.py            review text -> product quality vs delivery signal
+    demo_reviews.py          runnable sample: the text path without Kaggle
   optimize/
     milp.py                  price-grid MILP with portfolio guardrails
   evaluate/
     validation.py            estimator recovery against the known truth
     impact.py                uplift, guardrail frontier, sensitivity
-tests/                       15 tests: estimators, optimizer, review model
+tests/                       18 tests: estimators, optimizer, review model
 data/raw/                    Olist CSVs (not committed)
 reports/                     generated CSV outputs
 ```
@@ -172,6 +198,13 @@ python -m pricing.data --level product
 
 ```bash
 python -m pricing.pipeline --source olist
+```
+
+The review-text model on a built-in sample (downloads the encoder on first
+run, roughly 470 MB):
+
+```bash
+python -m pricing.demand.demo_reviews
 ```
 
 Tests and lint:
@@ -279,6 +312,8 @@ The test suite locks the properties that matter:
 - every guardrail holds in the returned solution
 - constraints can only ever cost margin, never add it
 - an unchanged price list scores exactly zero uplift
+- the demo's "keyword-free" reviews really do match neither lexicon, so the
+  accuracy it reports stays held out
 
 CI runs lint, the tests, and the estimator-recovery experiment on every push,
 so the table in this README is re-proved rather than pasted.
