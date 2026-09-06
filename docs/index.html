@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Price Optimization on Brazilian E-Commerce Data</title>
+<meta name="description" content="Estimating price elasticity from observational marketplace data, and turning that estimate into a constrained price list — with a pipeline that is allowed to refuse." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+/* ---- BCG X palette, read from bcg.com's own design tokens ---------------- */
+:root{
+  --midnight:#0C2B15;      /* --midnight-green */
+  --green-700:#0C2B15;
+  --green-500:#197A56;     /* deep emerald: the primary */
+  --green-400:#21BF61;
+  --green-300:#A8F0B8;
+  --green-200:#E3FDDB;
+  --green-100:#D8F4EF;
+  --accent:#96F878;        /* --accent-200, the signature lime */
+  --ink:#212427;           /* --black */
+  --ink-2:#4a4f52;
+  --ink-3:#6f7578;
+  --surface:#FCFCFB;
+  --surface-2:#F1EEEA;     /* --neutral-200, warm off-white */
+  --line:#DCD5CE;          /* --neutral-250 */
+  --violet:#4928FF;        /* BCG's blue-violet */
+  --gold:#BD8F1A;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:"Space Grotesk","Segoe UI",Arial,sans-serif;
+  --maxw:1080px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--surface);color:var(--ink);font-family:var(--sans);
+  font-size:17px;line-height:1.65;-webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+a{color:var(--green-500);text-decoration:none;border-bottom:1px solid rgba(25,122,86,.3)}
+a:hover{border-bottom-color:var(--green-500)}
+:focus-visible{outline:2px solid var(--green-500);outline-offset:3px;border-radius:3px}
+
+/* ---- header ------------------------------------------------------------- */
+header{
+  position:sticky;top:0;z-index:50;background:rgba(252,252,251,.86);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+}
+.hdr{display:flex;align-items:center;justify-content:space-between;height:60px;gap:20px}
+.brand{font-weight:700;font-size:.95rem;letter-spacing:-.01em;border:0}
+.brand span{color:var(--green-500)}
+nav{display:flex;gap:22px;font-size:.85rem;overflow-x:auto}
+nav a{color:var(--ink-2);border:0;white-space:nowrap}
+nav a:hover{color:var(--green-500)}
+@media(max-width:760px){nav{display:none}}
+
+/* ---- hero --------------------------------------------------------------- */
+.hero{background:var(--midnight);color:#fff;padding:76px 0 0}
+.kicker{
+  font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin-bottom:18px;
+}
+h1{
+  font-size:clamp(2rem,5.4vw,3.4rem);line-height:1.08;font-weight:700;
+  letter-spacing:-.025em;max-width:17ch;
+}
+.hero p.lede{
+  margin-top:22px;font-size:clamp(1.02rem,2.1vw,1.22rem);line-height:1.6;
+  color:rgba(255,255,255,.8);max-width:60ch;
+}
+.hero .links{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.btn{
+  display:inline-block;padding:11px 20px;border-radius:999px;font-size:.9rem;
+  font-weight:600;border:0;
+}
+.btn-primary{background:var(--accent);color:var(--midnight)}
+.btn-primary:hover{background:#aefa93}
+.btn-ghost{border:1px solid rgba(255,255,255,.28);color:#fff}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.stats{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:rgba(255,255,255,.13);margin-top:60px;
+  border-top:1px solid rgba(255,255,255,.13);
+}
+.stat{background:var(--midnight);padding:22px 20px}
+.stat b{display:block;font-size:1.65rem;font-weight:700;letter-spacing:-.02em;color:var(--accent)}
+.stat span{display:block;font-size:.76rem;color:rgba(255,255,255,.62);margin-top:5px;line-height:1.4}
+
+/* ---- sections ----------------------------------------------------------- */
+section{padding:72px 0;border-bottom:1px solid var(--line)}
+section.alt{background:var(--surface-2)}
+.sec-kicker{
+  font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--green-500);margin-bottom:12px;
+}
+h2{font-size:clamp(1.5rem,3.4vw,2.05rem);font-weight:700;letter-spacing:-.02em;line-height:1.2}
+h3{font-size:1.12rem;font-weight:600;margin:34px 0 10px;letter-spacing:-.01em}
+p{margin-top:14px;max-width:68ch}
+p.intro{font-size:1.08rem;color:var(--ink-2);margin-top:16px}
+strong{font-weight:600}
+.muted{color:var(--ink-3)}
+
+/* ---- callout ------------------------------------------------------------ */
+.callout{
+  border-left:3px solid var(--green-500);background:#fff;padding:18px 22px;
+  margin-top:24px;border-radius:0 8px 8px 0;box-shadow:0 1px 3px rgba(12,43,21,.06);
+}
+.callout.dark{background:var(--midnight);color:#fff;border-left-color:var(--accent)}
+.callout.dark p{color:rgba(255,255,255,.86)}
+.callout p:first-child{margin-top:0}
+.callout .lbl{
+  font-size:.7rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--green-500);
+}
+.callout.dark .lbl{color:var(--accent)}
+
+/* ---- tables ------------------------------------------------------------- */
+.tbl-wrap{overflow-x:auto;margin-top:22px;border:1px solid var(--line);border-radius:8px;background:#fff}
+table{border-collapse:collapse;width:100%;font-size:.88rem;min-width:520px}
+th{
+  background:var(--midnight);color:#fff;text-align:left;padding:11px 14px;
+  font-weight:600;font-size:.76rem;letter-spacing:.05em;text-transform:uppercase;
+}
+td{padding:11px 14px;border-top:1px solid var(--line);vertical-align:top}
+tbody tr:nth-child(even){background:var(--surface-2)}
+td.num,th.num{text-align:right;font-family:var(--mono);font-size:.83rem}
+code{
+  font-family:var(--mono);font-size:.86em;background:var(--green-100);
+  padding:1px 5px;border-radius:4px;color:var(--green-700);
+}
+
+/* ---- terminal ----------------------------------------------------------- */
+.term{
+  background:var(--midnight);border-radius:10px;overflow:hidden;margin-top:20px;
+  box-shadow:0 6px 20px rgba(12,43,21,.16);
+}
+.term-bar{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:rgba(255,255,255,.06);border-bottom:1px solid rgba(255,255,255,.1);
+}
+.dot{width:10px;height:10px;border-radius:50%;flex:none}
+.term-cmd{
+  font-family:var(--mono);font-size:.78rem;color:rgba(255,255,255,.72);margin-left:6px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.term pre{
+  margin:0;padding:16px 18px;overflow-x:auto;font-family:var(--mono);
+  font-size:.775rem;line-height:1.55;color:#dfe9e2;
+}
+.term pre b{color:var(--accent);font-weight:500}
+.term pre i{color:#ffd97a;font-style:normal}
+.term pre u{color:#8fd6ff;text-decoration:none}
+.term-note{font-size:.8rem;color:var(--ink-3);margin-top:10px}
+
+/* ---- charts ------------------------------------------------------------- */
+figure{margin:26px 0 0}
+figcaption{font-size:.84rem;color:var(--ink-3);margin-top:10px;max-width:70ch}
+.chart{background:#fff;border:1px solid var(--line);border-radius:10px;padding:20px 18px 14px}
+section.alt .chart{background:#fff}
+.chart h4{font-size:.95rem;font-weight:600;margin-bottom:3px}
+.chart .sub{font-size:.8rem;color:var(--ink-3);margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:820px){.grid2{grid-template-columns:1fr}}
+svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{
+  position:fixed;pointer-events:none;background:var(--midnight);color:#fff;
+  padding:7px 11px;border-radius:6px;font-size:.78rem;line-height:1.4;z-index:99;
+  opacity:0;transition:opacity .12s;box-shadow:0 4px 14px rgba(0,0,0,.24);white-space:nowrap;
+}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.78rem;color:var(--ink-2);margin-bottom:12px}
+.legend i{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:6px;vertical-align:-1px}
+
+/* ---- flow diagram ------------------------------------------------------- */
+.flow{display:grid;gap:12px;margin-top:26px}
+.flow-row{
+  display:grid;grid-template-columns:34px 1fr;gap:16px;align-items:start;
+  background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;
+}
+section.alt .flow-row{background:#fff}
+.flow-n{
+  width:34px;height:34px;border-radius:9px;background:var(--green-500);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:.9rem;
+}
+.flow-row.gate .flow-n{background:var(--midnight);color:var(--accent)}
+.flow-row h4{font-size:1rem;font-weight:600;margin-bottom:3px}
+.flow-row p{margin-top:4px;font-size:.92rem;color:var(--ink-2);max-width:none}
+.flow-row code{font-size:.8rem}
+
+/* ---- footer ------------------------------------------------------------- */
+footer{background:var(--midnight);color:rgba(255,255,255,.72);padding:48px 0;font-size:.88rem}
+footer a{color:var(--accent);border-bottom-color:rgba(150,248,120,.35)}
+footer .frow{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hdr">
+    <a class="brand" href="#top">price-optimization<span>-olist</span></a>
+    <nav>
+      <a href="#problem">Problem</a>
+      <a href="#approach">Approach</a>
+      <a href="#architecture">Architecture</a>
+      <a href="#run">Execution</a>
+      <a href="#results">Results</a>
+      <a href="#limits">Limitations</a>
+    </nav>
+  </div>
+</header>
+
+<div class="hero" id="top">
+  <div class="wrap">
+    <div class="kicker">Causal inference &middot; Optimization &middot; Machine learning</div>
+    <h1>Price Optimization on Brazilian E-Commerce Data</h1>
+    <p class="lede">
+      Estimating price elasticity from observational marketplace data, turning that
+      estimate into a constrained price list &mdash; and letting the pipeline
+      <strong>refuse to answer</strong> where the data cannot support one.
+    </p>
+    <div class="links">
+      <a class="btn btn-primary" href="https://github.com/BernardoliveiraFiap/price-optimization-olist">View the repository</a>
+      <a class="btn btn-ghost" href="#run">See it run</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>16,278</b><span>product-week observations</span></div>
+      <div class="stat"><b>3 / 20</b><span>categories priced &mdash; the rest refused</span></div>
+      <div class="stat"><b>+7.56%</b><span>margin uplift, guardrails respected</span></div>
+      <div class="stat"><b>30</b><span>tests, re-run by CI on every push</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================ PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-kicker">The problem</div>
+    <h2>Price is not assigned at random</h2>
+    <p class="intro">
+      Two traps sit between a dataset and a price list. The first is statistical,
+      the second is about decisions. Most analyses fall into both.
+    </p>
+
+    <h3>Trap 1 &mdash; the confound</h3>
+    <p>
+      Suppose you record the price and the occupancy of a hundred restaurants. The
+      expensive ones are fuller. Does raising prices fill a restaurant?
+    </p>
+    <p>
+      Of course not. The expensive restaurant is expensive <em>because it is good</em>.
+      You did not measure the effect of price; you measured the effect of quality,
+      which was hiding behind price. The same thing happens to products: a seller
+      charges more for exactly the items people want most.
+    </p>
+    <div class="callout">
+      <div class="lbl">The direction of the error is always the same</div>
+      <p>
+        Demand looks <strong>less</strong> price-sensitive than it is. In business
+        terms: raising prices looks safe when it is not. On the Olist data, naive
+        OLS returns <code>&minus;0.002</code> &mdash; the effect is not shrunk,
+        it is erased.
+      </p>
+    </div>
+
+    <h3>Trap 2 &mdash; an elasticity is not a price</h3>
+    <p>
+      Suppose the elasticity is correct. The optimal price for one product in
+      isolation is a textbook formula, and it is useless, because no pricing team
+      moves one product alone. Real constraints couple the whole portfolio:
+    </p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Guardrail</th><th>What it forbids</th></tr></thead>
+        <tbody>
+          <tr><td>Average price</td><td>Raising the portfolio's mean price beyond a cap</td></tr>
+          <tr><td>Revenue</td><td>Letting total revenue fall</td></tr>
+          <tr><td>Volume</td><td>Losing units sold</td></tr>
+          <tr><td>Per-product band</td><td>Moving any single price more than &plusmn;30%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Drop one price and another has to carry the average. That is no longer
+      arithmetic &mdash; it is a constrained optimization problem, which is why a
+      MILP sits at the end of the chain.
+    </p>
+  </div>
+</section>
+
+<!-- =============================================================== APPROACH -->
+<section id="approach" class="alt">
+  <div class="wrap">
+    <div class="sec-kicker">The approach</div>
+    <h2>Estimate &rarr; validate &rarr; decide &rarr; price the error</h2>
+    <p class="intro">
+      Four steps, plus a fifth property that turned out to matter more than any of
+      them: the pipeline is allowed to say <em>no</em>.
+    </p>
+
+    <div class="flow">
+      <div class="flow-row">
+        <div class="flow-n">1</div>
+        <div>
+          <h4>Estimate</h4>
+          <p>Three estimators that make progressively weaker assumptions about where prices came from: pooled OLS, two-way fixed effects, and 2SLS with a cost instrument. Comparing three numbers reveals the size of the bias; one number reveals nothing.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-n">2</div>
+        <div>
+          <h4>Validate against a known truth</h4>
+          <p>A synthetic market is generated whose true elasticity is <strong>written before anything is fitted</strong>. On real data the answer is unobservable, so &ldquo;my model says &minus;1.4&rdquo; cannot be checked by anyone. In the synthetic market it can.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-n">3</div>
+        <div>
+          <h4>Decide</h4>
+          <p>A mixed-integer program picks one price per product from a discrete grid, subject to every portfolio guardrail at once. The output is a price list a team could execute, not a coefficient.</p>
+        </div>
+      </div>
+      <div class="flow-row">
+        <div class="flow-n">4</div>
+        <div>
+          <h4>Price the error</h4>
+          <p>How much margin is lost by acting on the biased estimate, and how fast does the conclusion decay if the demand curve is wrong? This is the step that connects statistics to money.</p>
+        </div>
+      </div>
+      <div class="flow-row gate">
+        <div class="flow-n">5</div>
+        <div>
+          <h4>Refuse &mdash; the part that did the most work</h4>
+          <p>Two gates stand between an estimate and a price list, and <strong>on the real data both fire</strong>. An instrument with a first-stage F below 10 is not used. A category that is not credibly elastic is not priced. The result: <strong>77% of panel revenue receives no recommendation at all</strong> &mdash; which is the correct answer, not a gap to be filled by lowering the bar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================== ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-kicker">Architecture</div>
+    <h2>How the pieces connect</h2>
+    <p class="intro">
+      Two entry points feed the same chain: a synthetic market where the truth is
+      known, and the real Olist CSVs. Every stage is a module that can be run and
+      tested alone.
+    </p>
+
+    <figure>
+      <div class="chart">
+        <div id="arch"></div>
+      </div>
+      <figcaption>
+        The synthetic branch exists so the estimator layer can be falsified. The
+        real branch is where the gates fire.
+      </figcaption>
+    </figure>
+
+    <h3>What each file does</h3>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>File</th><th>Responsibility</th><th>Why it exists</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><code>config.py</code></td>
+            <td>Paths, guardrail defaults, panel parameters, the random seed</td>
+            <td>One place to change a policy constant, so no threshold is buried in logic</td>
+          </tr>
+          <tr>
+            <td><code>synth.py</code></td>
+            <td>Generates a market with a <strong>known</strong> elasticity and a tunable endogeneity knob</td>
+            <td>The backbone of validation: turning the confound off must remove the bias</td>
+          </tr>
+          <tr>
+            <td><code>data.py</code></td>
+            <td>Nine Olist CSVs &rarr; a product&times;week panel, plus the cost instrument</td>
+            <td>Isolates every real-data assumption in one readable place</td>
+          </tr>
+          <tr>
+            <td><code>elasticity/loglog_fe.py</code></td>
+            <td>Pooled OLS, two-way fixed effects, 2SLS &mdash; all with clustered standard errors</td>
+            <td>Three assumptions about price formation, three answers to compare</td>
+          </tr>
+          <tr>
+            <td><code>demand/ml_forecast.py</code></td>
+            <td>Gradient-boosted forecaster, expanding-window CV, and an elasticity probe</td>
+            <td>Answers &ldquo;why not just use ML?&rdquo; with a fitted model instead of an opinion</td>
+          </tr>
+          <tr>
+            <td><code>demand/review_nlp.py</code></td>
+            <td>Review text &rarr; product-quality signal, separated from delivery experience</td>
+            <td>A star rating conflates the product with the courier; only text can split them</td>
+          </tr>
+          <tr>
+            <td><code>optimize/milp.py</code></td>
+            <td>Price-grid MILP with the portfolio guardrails</td>
+            <td>Turns an elasticity into an executable price list</td>
+          </tr>
+          <tr>
+            <td><code>evaluate/validation.py</code></td>
+            <td>Estimator recovery against the known truth</td>
+            <td>The claim the CI re-proves on every push</td>
+          </tr>
+          <tr>
+            <td><code>evaluate/impact.py</code></td>
+            <td>Uplift, the guardrail frontier, and both sensitivity sweeps</td>
+            <td>Reports the range around the headline number, not just the number</td>
+          </tr>
+          <tr>
+            <td><code>pipeline.py</code></td>
+            <td>End-to-end run: estimate &rarr; gate &rarr; optimize &rarr; score</td>
+            <td>The single command that produces everything shown below</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ==================================================================== RUN -->
+<section id="run" class="alt">
+  <div class="wrap">
+    <div class="sec-kicker">Execution</div>
+    <h2>What running it actually prints</h2>
+    <p class="intro">
+      Every block below is real captured output from the commands as written &mdash;
+      not a mockup. The numbers on this page and the numbers in the repository come
+      from the same runs.
+    </p>
+
+    <h3>1. Validate the estimators against a known truth</h3>
+    <p class="muted">No data download needed &mdash; the market is generated.</p>
+    <div class="term">
+      <div class="term-bar">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+        <span class="term-cmd">python -m pricing.evaluate.validation --reps 20</span>
+      </div>
+      <pre>
+Estimator recovery on synthetic data -- ENDOGENOUS pricing, 20 markets
+
+        method  true_beta  mean_estimate   bias  rel_bias_pct   rmse  ci_coverage
+    Pooled OLS     -2.103         -1.590  0.513        24.479  0.518        0.000
+    Two-way FE     -2.103         -1.769  0.334        15.973  0.334        0.000
+<b>2SLS (cost IV)     -2.103         -2.103  0.000         0.008  0.009        1.000</b>
+
+rel_bias_pct > 0 means the estimate is closer to zero than the truth,
+i.e. demand looks less price-sensitive than it really is.</pre>
+    </div>
+    <p class="term-note">
+      2SLS recovers the written-down truth to within 0.008%, with 100% confidence-interval
+      coverage. The other two never cover it. This is the claim CI re-runs on every push.
+    </p>
+
+    <h3>2. Run the whole chain on the real Olist data</h3>
+    <div class="term">
+      <div class="term-bar">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+        <span class="term-cmd">python -m pricing.pipeline --source olist</span>
+      </div>
+      <pre>
+Panel: 16,278 rows | 844 products | 88 weeks
+
+Portfolio-wide elasticity
+  Pooled OLS             beta = -0.002 (SE 0.018)  95% CI [-0.036, +0.033]
+  Two-way FE             beta = -0.756 (SE 0.092)  95% CI [-0.936, -0.576]
+  2SLS (cost IV)         beta = +58.440 (SE 147.697)  95% CI [-231.046, +347.926]
+
+Estimator for the decision: estimate_twoway_fe
+  <i>instrument rejected: first-stage F = 0.16, below 10. 2SLS would be biased
+  toward OLS with no interval coverage</i>
+
+Elasticity by category
+                category  elasticity  std_error  t_stat  n_obs  credible
+<b>              cool_stuff      -1.443      0.362  -3.983    940      True</b>
+<b>           watches_gifts      -1.224      0.169  -7.246   1256      True</b>
+<b>               perfumery      -1.195      0.452  -2.643    564      True</b>
+        office_furniture      -1.079      0.683  -1.579    401     False
+         furniture_decor      -1.077      0.790  -1.363    943     False
+     luggage_accessories      -0.994      0.319  -3.113    201     False
+            garden_tools      -0.938      0.331  -2.839    695     False
+   computers_accessories      -0.751      0.246  -3.061   1215     False
+                    toys      -0.749      0.282  -2.654    588     False
+          bed_bath_table      -0.690      0.320  -2.158   1972     False
+              housewares      -0.670      0.234  -2.867    649     False
+             electronics       0.185      0.207   0.896    690     False
+              stationery       0.431      0.539   0.799    303     False
+                     ...
+
+  <i>3 of 20 categories are credibly elastic (beta &lt; -1.05, |t| &gt; 2.0)</i>
+
+Optimiser on 75 products across 3 categories (23% of panel revenue)
+  guardrails on   [Optimal] margin 6,957 -> 7,483 <b>(+7.56%)</b>  |  revenue -1.04%  |  avg price +5.00%
+  guardrails off  [Unconstrained] margin 6,957 -> 9,277 (+33.34%)  |  revenue -6.66%  |  avg price +30.00%
+  <i>guardrails cost 25.79 pp of margin uplift</i></pre>
+    </div>
+    <p class="term-note">
+      Both gates fire in this single run: the instrument is rejected on its
+      first-stage F, and 17 of 20 categories are refused a recommendation.
+    </p>
+
+    <h3>3. Ask whether machine learning could replace all of it</h3>
+    <div class="term">
+      <div class="term-bar">
+        <span class="dot" style="background:#ff5f57"></span>
+        <span class="dot" style="background:#febc2e"></span>
+        <span class="dot" style="background:#28c840"></span>
+        <span class="term-cmd">python -m pricing.demand.ml_forecast --folds 4</span>
+      </div>
+      <pre>
+Panel: 16278 rows, 844 units, 88 weeks
+
+--- with history ---
+model              RMSE      MAE
+persistence      0.7155   0.4880
+ridge            0.5739   0.4627
+<b>gbm              0.4489   0.3360</b>
+<i>implied elasticity from the GBM: -0.2811</i>
+
+--- price only ---
+model              RMSE      MAE
+persistence      0.6753   0.5538
+ridge            0.6726   0.5601
+gbm              0.4670   0.3477
+<i>implied elasticity from the GBM: -0.0504</i></pre>
+    </div>
+    <p class="term-note">
+      The tree cuts forecast error by 37% and still implies an elasticity less than
+      half the credible one. Strip its memory of past demand and it reads
+      &minus;0.05 &mdash; naive OLS all over again, reached by a different model class.
+    </p>
+  </div>
+</section>
+
+<!-- ================================================================ RESULTS -->
+<section id="results">
+  <div class="wrap">
+    <div class="sec-kicker">Results</div>
+    <h2>What the numbers say</h2>
+
+    <h3>Do the estimators recover a truth we planted?</h3>
+    <figure>
+      <div class="chart">
+        <h4>Estimated elasticity vs the written-down truth</h4>
+        <div class="sub">20 synthetic markets, true mean elasticity &minus;2.103</div>
+        <div id="c1"></div>
+      </div>
+      <figcaption>
+        Every bar that stops short of the dashed line understates how much demand
+        reacts to price. Only 2SLS reaches it &mdash; and only 2SLS ever covers the
+        truth with its confidence interval.
+      </figcaption>
+    </figure>
+
+    <h3>On the real data, which categories can be priced at all?</h3>
+    <figure>
+      <div class="chart">
+        <h4>Elasticity by category, real Olist panel</h4>
+        <div class="sub">Two-way fixed effects. A category is priced only below &minus;1.05 with |t| &gt; 2</div>
+        <div class="legend">
+          <span><i style="background:#197A56"></i>Credibly elastic &mdash; priced</span>
+          <span><i style="background:#C4B5A4"></i>Refused</span>
+        </div>
+        <div id="c2"></div>
+      </div>
+      <figcaption>
+        Seventeen categories sit above the threshold or carry an interval too wide
+        to act on. Two are estimated with the wrong sign entirely. The pipeline
+        prices the three on the left and declines the rest.
+      </figcaption>
+    </figure>
+
+    <div class="grid2">
+      <figure>
+        <div class="chart">
+          <h4>What the guardrails cost</h4>
+          <div class="sub">Margin uplift under each policy</div>
+          <div id="c3"></div>
+        </div>
+        <figcaption>
+          Removing the guardrails more than quadruples the uplift &mdash; by raising
+          the average price 30% and shedding 28% of volume. The policy is the decision.
+        </figcaption>
+      </figure>
+      <figure>
+        <div class="chart">
+          <h4>The margin assumption drives the size</h4>
+          <div class="sub">Olist records no cost, so this must be assumed</div>
+          <div id="c4"></div>
+        </div>
+        <figcaption>
+          The uplift ranges from +17.5% to +2.2% depending on an assumption the data
+          cannot supply. The direction is robust; the magnitude is not. This is the
+          project's biggest weakness, and it is stated in the README as a table.
+        </figcaption>
+      </figure>
+    </div>
+
+    <h3>The best forecaster is the worst pricing model</h3>
+    <div class="grid2">
+      <figure>
+        <div class="chart">
+          <h4>Forecast accuracy</h4>
+          <div class="sub">Held-out RMSE, expanding-window folds &mdash; lower is better</div>
+          <div id="c5"></div>
+        </div>
+        <figcaption>Gradient boosting wins the forecasting job decisively.</figcaption>
+      </figure>
+      <figure>
+        <div class="chart">
+          <h4>The elasticity each model implies</h4>
+          <div class="sub">Probed by holding all else fixed and moving price</div>
+          <div id="c6"></div>
+        </div>
+        <figcaption>And loses the pricing job just as decisively.</figcaption>
+      </figure>
+    </div>
+
+    <div class="callout dark">
+      <div class="lbl">The finding worth the conversation</div>
+      <p>
+        The variant <em>with</em> demand history is the <strong>less</strong> biased of
+        the two, which looks backwards until you notice what lagged demand is: a
+        product's own recent sales encode its latent quality, so the lags absorb
+        unit-level heterogeneity the way a fixed effect does &mdash; badly, but not
+        by nothing. The features that make the model a good forecaster are the same
+        ones that partially clean its elasticity. Neither effect was designed.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ LIMITATIONS -->
+<section id="limits" class="alt">
+  <div class="wrap">
+    <div class="sec-kicker">Limitations</div>
+    <h2>What this does not establish</h2>
+    <p class="intro">
+      Anyone auditing the project will press on one of these. They are stated here
+      for the same reason they are stated in the README: a result whose boundary is
+      known is worth more than one presented without it.
+    </p>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Limitation</th><th>What it means for the result</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Olist records no cost</strong></td>
+            <td>The size of the uplift follows the assumed gross margin: +17.5% at 20%, +2.2% at 60%. The direction survives; the magnitude is an assumption.</td>
+          </tr>
+          <tr>
+            <td><strong>No counterfactual</strong></td>
+            <td>Nobody re-ran 2017 at different prices. The uplift is what the estimated curve implies, not a measured outcome.</td>
+          </tr>
+          <tr>
+            <td><strong>Causal identification does not fully hold on real data</strong></td>
+            <td>With the instrument rejected, fixed effects carry the claim &mdash; which assumes weekly price moves are not driven by demand. That is a hypothesis. The synthetic experiment measures exactly how much bias survives when it fails: +16.0%.</td>
+          </tr>
+          <tr>
+            <td><strong>Constant elasticity</strong></td>
+            <td>No reference-price effects, no psychological thresholds, no asymmetry between raising and cutting price.</td>
+          </tr>
+          <tr>
+            <td><strong>Products treated as independent</strong></td>
+            <td>Cannibalisation between substitutes is not modelled, which overstates the gain from raising one item's price.</td>
+          </tr>
+          <tr>
+            <td><strong>The panel is a slice</strong></td>
+            <td>Of 32,216 products, 844 have 12+ weeks of history. Conclusions apply to products with turnover, not to the whole marketplace.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap frow">
+    <div>
+      <strong style="color:#fff">price-optimization-olist</strong><br />
+      Built by Enzo Bernardo &middot; MIT licensed
+    </div>
+    <div>
+      <a href="https://github.com/BernardoliveiraFiap/price-optimization-olist">Repository</a> &nbsp;&middot;&nbsp;
+      <a href="https://enzobernardo.com">enzobernardo.com</a>
+    </div>
+  </div>
+</footer>
+
+<div class="tip" id="tip"></div>
+
+<script>
+/* ---------------------------------------------------------------- helpers */
+const NS = "http://www.w3.org/2000/svg";
+const el = (n, a = {}) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
+const tip = document.getElementById("tip");
+
+function hoverable(node, html) {
+  node.style.cursor = "default";
+  node.addEventListener("mousemove", (ev) => {
+    tip.innerHTML = html;
+    tip.style.opacity = 1;
+    const r = tip.getBoundingClientRect();
+    let x = ev.clientX + 14, y = ev.clientY - r.height - 10;
+    if (x + r.width > innerWidth - 8) x = ev.clientX - r.width - 14;
+    if (y < 8) y = ev.clientY + 18;
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  });
+  node.addEventListener("mouseleave", () => { tip.style.opacity = 0; });
+}
+
+/**
+ * Horizontal bars for signed magnitudes.
+ * Data ends are rounded 4px and anchored to the zero baseline; a 2px surface
+ * gap separates adjacent fills. Every bar carries a direct value label, which
+ * is also the relief the palette validator requires for the low-contrast hue.
+ */
+function barsH(mount, rows, opts = {}) {
+  const { labelW = 150, rowH = 30, gap = 8, ref = null, refLabel = "", fmt = v => v.toFixed(3),
+          domainPad = 1.18, valueSuffix = "" } = opts;
+  const W = 700, H = rows.length * (rowH + gap) + 42;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+
+  const vals = rows.map(r => r.v).concat(ref === null ? [] : [ref]);
+  const lo = Math.min(0, ...vals) * domainPad, hi = Math.max(0, ...vals) * domainPad;
+  const x0 = labelW, x1 = W - 58;
+  const sx = v => x0 + ((v - lo) / (hi - lo)) * (x1 - x0);
+  const zero = sx(0);
+
+  // zero baseline
+  svg.appendChild(el("line", { x1: zero, x2: zero, y1: 8, y2: H - 30, stroke: "#DCD5CE", "stroke-width": 1 }));
+
+  if (ref !== null) {
+    const rx = sx(ref);
+    svg.appendChild(el("line", { x1: rx, x2: rx, y1: 4, y2: H - 30, stroke: "#212427",
+      "stroke-width": 2, "stroke-dasharray": "5 4", opacity: .75 }));
+    const t = el("text", { x: rx, y: H - 12, "text-anchor": "middle", fill: "#4a4f52",
+      "font-size": 11, "font-family": "var(--sans)" });
+    t.textContent = refLabel; svg.appendChild(t);
+  }
+
+  rows.forEach((r, i) => {
+    const y = 8 + i * (rowH + gap);
+    const bw = Math.abs(sx(r.v) - zero);
+    const bx = r.v < 0 ? zero - bw : zero;
+
+    const lab = el("text", { x: labelW - 12, y: y + rowH / 2 + 4, "text-anchor": "end",
+      fill: r.dim ? "#6f7578" : "#212427", "font-size": 12.5,
+      "font-weight": r.strong ? 600 : 400, "font-family": "var(--sans)" });
+    lab.textContent = r.k; svg.appendChild(lab);
+
+    const bar = el("rect", { x: bx, y, width: Math.max(bw, 2), height: rowH,
+      rx: 4, fill: r.c || "#197A56" });
+    hoverable(bar, `<b>${r.k}</b><br>${fmt(r.v)}${valueSuffix}${r.note ? "<br>" + r.note : ""}`);
+    svg.appendChild(bar);
+
+    const vt = el("text", { x: r.v < 0 ? bx - 8 : bx + bw + 8, y: y + rowH / 2 + 4,
+      "text-anchor": r.v < 0 ? "end" : "start", fill: "#4a4f52", "font-size": 11.5,
+      "font-family": "var(--mono)" });
+    vt.textContent = fmt(r.v) + valueSuffix; svg.appendChild(vt);
+  });
+
+  mount.appendChild(svg);
+}
+
+/* ------------------------------------------------------------------ chart 1 */
+barsH(document.getElementById("c1"), [
+  { k: "Pooled OLS", v: -1.590, c: "#C4B5A4", note: "bias +24.5% &middot; CI coverage 0%" },
+  { k: "Two-way FE", v: -1.769, c: "#7FBF9E", note: "bias +16.0% &middot; CI coverage 0%" },
+  { k: "2SLS (cost IV)", v: -2.103, c: "#197A56", strong: 1, note: "bias +0.01% &middot; CI coverage 100%" },
+], { ref: -2.103, refLabel: "true elasticity  -2.103", labelW: 140 });
+
+/* ------------------------------------------------------------------ chart 2 */
+const CATS = [
+  ["cool_stuff", -1.443, 1], ["watches_gifts", -1.224, 1], ["perfumery", -1.195, 1],
+  ["office_furniture", -1.079, 0], ["furniture_decor", -1.077, 0], ["luggage_accessories", -0.994, 0],
+  ["garden_tools", -0.938, 0], ["computers_accessories", -0.751, 0], ["toys", -0.749, 0],
+  ["bed_bath_table", -0.690, 0], ["housewares", -0.670, 0], ["fashion_bags_accessories", -0.453, 0],
+  ["sports_leisure", -0.428, 0], ["health_beauty", -0.391, 0], ["pet_shop", -0.349, 0],
+  ["telephony", -0.341, 0], ["auto", -0.266, 0], ["baby", -0.032, 0],
+  ["electronics", 0.185, 0], ["stationery", 0.431, 0],
+];
+barsH(document.getElementById("c2"),
+  CATS.map(([k, v, ok]) => ({
+    k: k.replace(/_/g, " "), v, c: ok ? "#197A56" : "#C4B5A4", dim: !ok, strong: ok,
+    note: ok ? "priced" : "refused &mdash; not credibly elastic",
+  })),
+  { ref: -1.05, refLabel: "threshold  -1.05", labelW: 168, rowH: 19, gap: 5 });
+
+/* ------------------------------------------------------------------ chart 3 */
+barsH(document.getElementById("c3"), [
+  { k: "No guardrails", v: 33.343, c: "#C4B5A4", note: "avg price +30% &middot; volume -28%" },
+  { k: "Base policy", v: 7.557, c: "#197A56", strong: 1, note: "avg price +5% &middot; volume -6%" },
+  { k: "+ grow volume 10%", v: 3.643, c: "#7FBF9E", note: "volume +10%" },
+  { k: "+ cut avg price 3%", v: -5.602, c: "#BD8F1A", note: "volume +10% &middot; price -3%" },
+], { labelW: 158, fmt: v => (v >= 0 ? "+" : "") + v.toFixed(2), valueSuffix: "%" });
+
+/* ------------------------------------------------------------------ chart 4 */
+barsH(document.getElementById("c4"), [
+  { k: "20% margin", v: 17.520, c: "#0C2B15" },
+  { k: "30% margin", v: 9.763, c: "#197A56" },
+  { k: "35% margin", v: 7.557, c: "#2E9268", strong: 1, note: "the headline figure" },
+  { k: "45% margin", v: 4.617, c: "#7FBF9E" },
+  { k: "60% margin", v: 2.154, c: "#A8F0B8" },
+], { labelW: 118, fmt: v => "+" + v.toFixed(2), valueSuffix: "%" });
+
+/* ------------------------------------------------------------------ chart 5 */
+barsH(document.getElementById("c5"), [
+  { k: "Persistence", v: 0.7155, c: "#C4B5A4" },
+  { k: "Ridge", v: 0.5739, c: "#7FBF9E" },
+  { k: "Gradient boosting", v: 0.4489, c: "#197A56", strong: 1, note: "-37% vs persistence" },
+], { labelW: 148, fmt: v => v.toFixed(4) });
+
+/* ------------------------------------------------------------------ chart 6 */
+barsH(document.getElementById("c6"), [
+  { k: "GBM, no history", v: -0.0504, c: "#BD8F1A", note: "naive OLS reads -0.002" },
+  { k: "GBM, with history", v: -0.2811, c: "#C4B5A4", note: "the best forecaster" },
+  { k: "Two-way FE", v: -0.756, c: "#197A56", strong: 1, note: "the estimate used to decide" },
+], { labelW: 148, ref: -0.756, refLabel: "credible  -0.756" });
+
+/* ------------------------------------------------- architecture flow diagram */
+(function arch() {
+  const W = 860, H = 300;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
+  const box = (x, y, w, h, label, sub, fill, ink, dashed) => {
+    const g = el("g");
+    g.appendChild(el("rect", { x, y, width: w, height: h, rx: 9, fill,
+      stroke: dashed ? "#197A56" : "none", "stroke-width": dashed ? 1.5 : 0,
+      "stroke-dasharray": dashed ? "5 4" : "none" }));
+    const t = el("text", { x: x + w / 2, y: y + (sub ? h / 2 - 3 : h / 2 + 4),
+      "text-anchor": "middle", fill: ink, "font-size": 13, "font-weight": 600,
+      "font-family": "var(--sans)" });
+    t.textContent = label; g.appendChild(t);
+    if (sub) {
+      const s = el("text", { x: x + w / 2, y: y + h / 2 + 15, "text-anchor": "middle",
+        fill: ink, opacity: .68, "font-size": 11, "font-family": "var(--mono)" });
+      s.textContent = sub; g.appendChild(s);
+    }
+    svg.appendChild(g); return g;
+  };
+  const arrow = (x1, y1, x2, y2) => {
+    svg.appendChild(el("line", { x1, y1, x2, y2, stroke: "#8a9a90", "stroke-width": 1.6,
+      "marker-end": "url(#ah)" }));
+  };
+  const defs = el("defs");
+  const m = el("marker", { id: "ah", viewBox: "0 0 8 8", refX: 7, refY: 4,
+    markerWidth: 7, markerHeight: 7, orient: "auto" });
+  m.appendChild(el("path", { d: "M0,0 L8,4 L0,8 z", fill: "#8a9a90" }));
+  defs.appendChild(m); svg.appendChild(defs);
+
+  box(0, 20, 168, 54, "synth.py", "known elasticity", "#E3FDDB", "#0C2B15");
+  box(0, 110, 168, 54, "data.py", "9 Olist CSVs", "#E3FDDB", "#0C2B15");
+  arrow(168, 47, 232, 62); arrow(168, 137, 232, 122);
+
+  box(234, 62, 176, 58, "elasticity/", "OLS · FE · 2SLS", "#197A56", "#fff");
+  arrow(410, 91, 470, 91);
+
+  box(472, 52, 150, 78, "GATE", "F ≥ 10 · |t| > 2", "#0C2B15", "#96F878", 1);
+  arrow(622, 91, 684, 91);
+
+  box(686, 62, 174, 58, "optimize/milp.py", "price list", "#197A56", "#fff");
+
+  box(234, 186, 176, 54, "demand/", "GBM · review NLP", "#F1EEEA", "#0C2B15");
+  arrow(322, 186, 322, 126);
+
+  box(472, 186, 150, 54, "evaluate/", "uplift · sensitivity", "#F1EEEA", "#0C2B15");
+  arrow(547, 186, 547, 136);
+
+  const note = el("text", { x: 547, y: 268, "text-anchor": "middle", fill: "#6f7578",
+    "font-size": 11.5, "font-family": "var(--sans)" });
+  note.textContent = "the gate is where 17 of 20 categories stop";
+  svg.appendChild(note);
+
+  document.getElementById("arch").appendChild(svg);
+})();
+</script>
+</body>
+</html>
