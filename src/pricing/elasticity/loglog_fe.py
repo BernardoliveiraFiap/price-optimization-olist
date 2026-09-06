@@ -29,6 +29,11 @@ import statsmodels.api as sm
 
 DEFAULT_CONTROLS = ("log_freight", "competition", "review_score")
 
+# Staiger-Stock rule of thumb. Below this the 2SLS point estimate is not
+# merely imprecise, it is biased toward OLS and its confidence interval
+# has no meaningful coverage, so it must not be used for a decision.
+WEAK_INSTRUMENT_F = 10.0
+
 
 @dataclass
 class ElasticityResult:
@@ -235,7 +240,10 @@ def estimate_iv(
         ci_high=beta + 1.96 * se,
         n_obs=len(d),
         n_units=int(d["unit_id"].nunique()),
-        diagnostics={"first_stage_F": first_stage_f},
+        diagnostics={
+            "first_stage_F": first_stage_f,
+            "weak_instrument": bool(first_stage_f < WEAK_INSTRUMENT_F),
+        },
     )
 
 

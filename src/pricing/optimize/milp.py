@@ -205,6 +205,14 @@ def optimise_prices(
         [bool(x[(r.unit_id, r.grid_k)].value()) for r in grid.itertuples()],
         dtype=bool,
     )
+    if status != "Optimal" or selected.sum() != len(products):
+        # An infeasible or aborted solve leaves the variables unset, which used
+        # to surface far downstream as an empty frame and a broadcast error.
+        raise RuntimeError(
+            f"solver returned status {status!r} with {int(selected.sum())} of "
+            f"{len(products)} products priced. The guardrails are most likely "
+            "mutually infeasible for this price band."
+        )
     chosen = grid.loc[selected].copy()
     chosen = chosen.rename(
         columns={
