@@ -27,7 +27,7 @@
   --gold:#BD8F1A;
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --sans:"Space Grotesk","Segoe UI",Arial,sans-serif;
-  --maxw:1100px;
+  --maxw:1280px;
 }
 /* The whole page is sized in rem off this root, so one number moves every
    type size together. 110% is the reading size the owner settled on. */
@@ -38,7 +38,7 @@ body{
   font-size:1.0625rem;line-height:1.65;-webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
 }
-.wrap{max-width:var(--maxw);margin:0 auto;padding:0 1.5rem}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 2rem}
 a{color:var(--green-500);text-decoration:none;border-bottom:1px solid rgba(25,122,86,.3)}
 a:hover{border-bottom-color:var(--green-500)}
 :focus-visible{outline:2px solid var(--green-500);outline-offset:3px;border-radius:3px}
@@ -156,7 +156,7 @@ figcaption{font-size:.86rem;color:var(--ink-3);margin-top:.6rem;max-width:68ch}
 .chart{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.1rem .85rem}
 .chart h4{font-size:.97rem;font-weight:600;margin-bottom:.15rem}
 .chart .sub{font-size:.81rem;color:var(--ink-3);margin-bottom:.85rem}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
 @media(max-width:860px){.grid2{grid-template-columns:1fr}}
 svg{display:block;width:100%;height:auto;overflow:visible}
 .tip{
@@ -168,10 +168,10 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .legend i{width:.65rem;height:.65rem;border-radius:3px;display:inline-block;margin-right:.35rem;vertical-align:-1px}
 
 /* ---- the two traps, side by side --------------------------------------- */
-.traps{display:grid;grid-template-columns:1fr 1fr;gap:2.6rem;margin-top:.4rem}
+.traps{display:grid;grid-template-columns:1fr 1fr;gap:4.5rem;margin-top:.4rem}
 .traps > div{min-width:0}
 .traps h3{margin-top:1.6rem}
-.traps p{max-width:none}
+.traps p{max-width:62ch}
 .traps table{min-width:0}
 @media(max-width:880px){.traps{grid-template-columns:1fr;gap:.6rem}}
 
@@ -200,7 +200,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 }
 
 /* ---- limitations as cards, each with its remedy ------------------------- */
-.lims{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-top:1.5rem}
+.lims{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-top:1.5rem}
 @media(max-width:880px){.lims{grid-template-columns:1fr}}
 .lim{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.1rem 1.2rem 1.2rem}
 .lim h4{font-size:1rem;font-weight:600;margin-bottom:.4rem;letter-spacing:-.01em}
@@ -217,7 +217,7 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 /* ---- approach: five steps across ---------------------------------------- */
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:1.6rem}
-.step{background:#fff;padding:1.15rem 1rem 1.3rem;display:flex;flex-direction:column}
+.step{background:#fff;padding:1.3rem 1.15rem 1.5rem;display:flex;flex-direction:column}
 .step-n{
   width:1.9rem;height:1.9rem;border-radius:8px;background:var(--green-500);color:#fff;
   display:grid;place-items:center;font-weight:700;font-size:.85rem;margin-bottom:.75rem;flex:none;
@@ -390,7 +390,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
         <button class="term-run" type="button" data-secs="3" data-elapsed="3s"></button>
       </div>
       <div class="term-prog" hidden><i></i></div>
-      <div class="term-idle"><span class="caret"></span><span class="idle-label"></span></div>
+      <div class="term-idle"><span class="caret"></span></div>
       <pre hidden>
 Estimator recovery on synthetic data -- ENDOGENOUS pricing, 20 markets
 
@@ -413,7 +413,7 @@ i.e. demand looks less price-sensitive than it really is.</pre>
         <button class="term-run" type="button" data-secs="129" data-elapsed="2m 09s"></button>
       </div>
       <div class="term-prog" hidden><i></i></div>
-      <div class="term-idle"><span class="caret"></span><span class="idle-label"></span></div>
+      <div class="term-idle"><span class="caret"></span></div>
       <pre hidden>
 Panel: 16,278 rows | 844 products | 88 weeks
 
@@ -461,7 +461,7 @@ Optimiser on 75 products across 3 categories (23% of panel revenue)
         <button class="term-run" type="button" data-secs="9" data-elapsed="9s"></button>
       </div>
       <div class="term-prog" hidden><i></i></div>
-      <div class="term-idle"><span class="caret"></span><span class="idle-label"></span></div>
+      <div class="term-idle"><span class="caret"></span></div>
       <pre hidden>
 Panel: 16278 rows, 844 units, 88 weeks
 
@@ -668,7 +668,6 @@ const TRANSLATIONS = {
     "lim.intro":"Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose boundary is known is worth more than one presented without it.",
     "lim.fixLbl":"What would close it",
     "term.run":"Run","term.running":"running","term.again":"Run again",
-    "term.idle":"output hidden until you run it",
     "term.foot":"real run on the author’s machine:",
 
     "foot.by":"Built by Enzo Bernardo &middot; MIT licensed","foot.repo":"Repository",
@@ -770,7 +769,6 @@ const TRANSLATIONS = {
     "lim.intro":"Quem for auditar o projeto vai apertar em um destes pontos. Estão aqui pelo mesmo motivo que estão no README: um resultado cuja fronteira é conhecida vale mais que um apresentado sem ela.",
     "lim.fixLbl":"O que resolveria",
     "term.run":"Rodar","term.running":"rodando","term.again":"Rodar de novo",
-    "term.idle":"saída escondida até você rodar",
     "term.foot":"execução real na máquina do autor:",
 
     "foot.by":"Feito por Enzo Bernardo &middot; licença MIT","foot.repo":"Repositório",
@@ -865,11 +863,9 @@ function applyLanguage() {
 function labelTerminals() {
   document.querySelectorAll(".term").forEach(term => {
     const btn = term.querySelector(".term-run");
-    const idle = term.querySelector(".idle-label");
     const foot = term.querySelector(".term-foot");
     if (!btn) return;
     btn.textContent = btn.dataset.done ? t("term.again") : t("term.run");
-    if (idle) idle.textContent = t("term.idle");
     if (foot && btn.dataset.done) foot.textContent = t("term.foot") + " " + btn.dataset.elapsed;
   });
 }
