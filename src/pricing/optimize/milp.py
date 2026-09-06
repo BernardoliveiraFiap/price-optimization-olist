@@ -199,9 +199,13 @@ def optimise_prices(
     problem.solve(solver)
     status = pulp.LpStatus[problem.status]
 
-    chosen = grid[
-        [bool(x[(r.unit_id, r.grid_k)].value()) for r in grid.itertuples()]
-    ].copy()
+    # np.asarray, not a bare list: a Python list of bools is ambiguous to
+    # pandas and can be read as a list of column labels.
+    selected = np.asarray(
+        [bool(x[(r.unit_id, r.grid_k)].value()) for r in grid.itertuples()],
+        dtype=bool,
+    )
+    chosen = grid.loc[selected].copy()
     chosen = chosen.rename(
         columns={
             "price": "price_before",
