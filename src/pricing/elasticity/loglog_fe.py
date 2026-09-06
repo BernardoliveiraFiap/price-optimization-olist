@@ -169,3 +169,71 @@ def estimate_twoway_fe(
         n_units=int(d["unit_id"].nunique()),
         diagnostics={"absorbed_controls": len(ctrl) - len(varying)},
     )
+
+
+def estimate_iv(
+    df: pd.DataFrame,
+    instrument: str = "cost_index",
+    controls: tuple[str, ...] = DEFAULT_CONTROLS,
+) -> ElasticityResult:
+    """Two-stage least squares on the within-transformed panel.
+
+    Stage 1 projects log price onto the cost shifter; stage 2 regresses log
+    quantity on the fitted price. The covariance is the clustered 2SLS
+    sandwich -- residuals are formed with the *actual* price, not the fitted
+    one, otherwise the standard error is understated.
+    """
+    d = add_model_columns(df)
+    if instrument not in d.columns:
+        raise KeyError(f"instrument column {instrument!r} not in panel")
+    ctrl = _available(d, controls)
+    d = d.dropna(subset=["log_units", "log_price", instrument, *ctrl])
+
+    varying = _within_varying(d, ctrl)
+    W = _within_transform(d, ["log_units", "log_price", instrument, *varying])
+
+    y = W["log_units"].to_numpy()
+    price = W["log_price"].to_numpy()
+    inst = W[instrument].to_numpy()
+    exog = (
+        np.column_stack([W[c] for c in varying])
+        if varying
+        else np.empty((len(d), 0))
+    )
+    groups = d["unit_id"].to_numpy()
+
+    # Stage 1 ------------------------------------------------------------
+    Z = np.column_stack([inst, exog]) if exog.size else inst.reshape(-1, 1)
+    first = sm.OLS(price, Z).fit(cov_type="cluster", cov_kwds={"groups": groups})
+    price_hat = np.asarray(first.fittedvalues)
+    first_stage_f = float(first.tvalues[0] ** 2)  # weak-instrument diagnostic
+
+    # Stage 2 ------------------------------------------------------------
+    X2 = (
+        np.column_stack([price_hat, exog]) if exog.size else price_hat.reshape(-1, 1)
+    )
+    params = np.linalg.lstsq(X2, y, rcond=None)[0]
+    beta = float(params[0])
+
+    X_actual = np.column_stack([price, exog]) if exog.size else price.reshape(-1, 1)
+    resid = y - X_actual @ params
+    bread = np.linalg.pinv(X2.T @ X2)
+    meat = np.zeros((X2.shape[1], X2.shape[1]))
+    for g in np.unique(groups):
+        m = groups == g
+        u = (X2[m] * resid[m][:, None]).sum(axis=0)
+        meat += np.outer(u, u)
+    n_g = len(np.unique(groups))
+    cov = bread @ meat @ bread * (n_g / max(n_g - 1, 1))
+    se = float(np.sqrt(np.diag(cov))[0])
+
+    return ElasticityResult(
+        method="2SLS (cost IV)",
+        elasticity=beta,
+        std_error=se,
+        ci_low=beta - 1.96 * se,
+        ci_high=beta + 1.96 * se,
+        n_obs=len(d),
+        n_units=int(d["unit_id"].nunique()),
+        diagnostics={"first_stage_F": first_stage_f},
+    )
