@@ -24,6 +24,7 @@ from .elasticity.loglog_fe import (
 from .evaluate.impact import (
     build_products,
     cost_of_naive_elasticity,
+    guardrail_frontier,
     sensitivity_to_elasticity,
 )
 from .optimize.milp import OptimisationConfig, optimise_prices, optimise_unconstrained
@@ -101,6 +102,10 @@ def run(source: str = "synth", write: bool = True) -> dict:
     )
     print(f"  guardrails cost {guardrail_cost:.2f} pp of margin uplift")
 
+    frontier = guardrail_frontier(products, beta_causal, cfg)
+    print("\nWhat each guardrail costs")
+    print(frontier.to_string(index=False, float_format=lambda v: f"{v: .3f}"))
+
     # --- 3. what the naive estimate costs ---------------------------------
     naive_cost = cost_of_naive_elasticity(products, beta_naive, beta_causal, cfg)
     print("\nPricing with the biased elasticity, scored under the credible one")
@@ -117,6 +122,7 @@ def run(source: str = "synth", write: bool = True) -> dict:
         constrained.prices.to_csv(REPORTS / f"price_list_{source}.csv", index=False)
         naive_cost.to_csv(REPORTS / f"cost_of_naive_{source}.csv", index=False)
         sens.to_csv(REPORTS / f"sensitivity_{source}.csv", index=False)
+        frontier.to_csv(REPORTS / f"guardrail_frontier_{source}.csv", index=False)
         print(f"\nWrote CSV outputs to {REPORTS}")
 
     return {
@@ -124,6 +130,7 @@ def run(source: str = "synth", write: bool = True) -> dict:
         "elasticity_by_category": causal_tbl,
         "optimisation": constrained.summary,
         "unconstrained": unconstrained.summary,
+        "guardrail_frontier": frontier,
         "cost_of_naive": naive_cost,
         "sensitivity": sens,
     }

@@ -15,11 +15,17 @@ Two things separate this from a model report:
 
 from __future__ import annotations
 
+from dataclasses import replace
+
 import numpy as np
 import pandas as pd
 
 from ..config import DEFAULT_MARGIN_RATE
-from ..optimize.milp import OptimisationConfig, optimise_prices
+from ..optimize.milp import (
+    OptimisationConfig,
+    optimise_prices,
+    optimise_unconstrained,
+)
 
 
 def build_products(
@@ -142,6 +148,64 @@ def cost_of_naive_elasticity(
 
     out = pd.DataFrame(rows)
     out["margin_left_on_table_pct"] = (
+        out["margin_uplift_pct"].max() - out["margin_uplift_pct"]
+    )
+    return out
+
+
+def guardrail_frontier(
+    products: pd.DataFrame,
+    beta_belief: dict[str, float] | float,
+    config: OptimisationConfig | None = None,
+) -> pd.DataFrame:
+    """What each business guardrail costs in margin.
+
+    A fair question about this project is why a solver is needed at all, when
+    the unconstrained optimum has a closed form. The answer is only visible
+    once the guardrails bind: as the policy tightens, the per-product optimum
+    becomes infeasible and the products have to trade headroom between them.
+    That trade is the MILP's job, and this table is the price list a pricing
+    owner would actually negotiate over.
+    """
+    base = config or OptimisationConfig()
+    p = products.copy()
+    if isinstance(beta_belief, dict):
+        fallback = float(np.mean(list(beta_belief.values())))
+        p["elasticity"] = p["category"].map(beta_belief).fillna(fallback)
+    else:
+        p["elasticity"] = float(beta_belief)
+
+    # The first two regimes are deliberately loose and do not bind here: the
+    # margin-optimal reallocation already respects them. Guardrails only start
+    # costing money once the business asks for something margin does not want
+    # to give -- volume growth, or a price cut it promised the market.
+    regimes = {
+        "none (per-product optimum)": None,
+        "base policy": base,
+        "grow volume 10%": replace(base, min_volume_ratio=1.10),
+        "grow volume 10% + cut avg price 3%": replace(
+            base, min_volume_ratio=1.10, max_avg_price_increase=-0.03
+        ),
+    }
+
+    rows = []
+    for label, cfg in regimes.items():
+        result = (
+            optimise_unconstrained(p, base) if cfg is None else optimise_prices(p, cfg)
+        )
+        s = result.summary
+        rows.append(
+            {
+                "guardrails": label,
+                "status": result.status,
+                "margin_uplift_pct": s["margin_uplift_pct"],
+                "revenue_uplift_pct": s["revenue_uplift_pct"],
+                "volume_change_pct": s["volume_change_pct"],
+                "avg_price_change_pct": s["avg_price_change_pct"],
+            }
+        )
+    out = pd.DataFrame(rows)
+    out["margin_given_up_pp"] = (
         out["margin_uplift_pct"].max() - out["margin_uplift_pct"]
     )
     return out
