@@ -211,6 +211,47 @@ def guardrail_frontier(
     return out
 
 
+def sensitivity_to_margin_rate(
+    products: pd.DataFrame,
+    beta_belief: dict[str, float] | float,
+    rates: tuple[float, ...] = (0.20, 0.30, 0.35, 0.45, 0.60),
+    config: OptimisationConfig | None = None,
+) -> pd.DataFrame:
+    """How much of the answer is the cost assumption rather than the data?
+
+    Olist records no costs, so a gross-margin rate has to be assumed, and the
+    constant-elasticity optimum ``p* = c * beta / (1 + beta)`` is proportional
+    to that cost. A thin assumed margin puts every product far below its
+    optimum and the optimiser recommends raising everything; a fat one does the
+    opposite. Re-optimising across the range shows how much of the
+    recommendation is data and how much is assumption.
+    """
+    base = config or OptimisationConfig()
+    p = products.copy()
+    if isinstance(beta_belief, dict):
+        fallback = float(np.mean(list(beta_belief.values())))
+        p["elasticity"] = p["category"].map(beta_belief).fillna(fallback)
+    else:
+        p["elasticity"] = float(beta_belief)
+    p = p.drop(columns=["unit_cost"], errors="ignore")
+
+    rows = []
+    for rate in rates:
+        cfg = replace(base, margin_rate=rate)
+        result = optimise_prices(p, cfg)
+        s = result.summary
+        rows.append(
+            {
+                "assumed_margin_rate": rate,
+                "margin_uplift_pct": s["margin_uplift_pct"],
+                "avg_price_change_pct": s["avg_price_change_pct"],
+                "volume_change_pct": s["volume_change_pct"],
+                "share_price_up": s.get("share_price_up", float("nan")),
+            }
+        )
+    return pd.DataFrame(rows)
+
+
 def sensitivity_to_elasticity(
     products: pd.DataFrame,
     beta_belief: dict[str, float] | float,

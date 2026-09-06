@@ -28,7 +28,7 @@ volume.
 
 ## Results
 
-### Do the estimators recover a known truth?
+### On synthetic data: do the estimators recover a known truth?
 
 20 independent synthetic markets, true mean elasticity -2.103:
 
@@ -94,9 +94,80 @@ e muito fino, sensacao de barato" (product, 1.00). The single miss is
 lexicon and the embedding is the argument for using a language model here
 instead of a regex.
 
+### On real Olist data: the pipeline refuses most of the portfolio
+
+This is where the synthetic result and the real one part company, and the gap
+is the point of the project.
+
+The panel keeps 844 of 32,216 products -- the ones with at least 12 weeks of
+sales -- for 16,278 product-weeks over 88 weeks. Everything else is the long
+tail, sold a handful of times, carrying no usable price variation.
+
+**The instrument does not survive contact with the data.**
+
+| Estimator | Estimate | Standard error |
+|---|---|---|
+| Pooled OLS | -0.002 | 0.018 |
+| Two-way fixed effects | **-0.756** | 0.092 |
+| 2SLS (Hausman instrument) | +58.440 | 147.697 |
+
+The 2SLS number is not imprecise, it is meaningless: the **first-stage F is
+0.16** against a threshold of 10. The reason is visible in one statistic --
+only **1.1% of the variance in log price is within-product**. A given Olist
+listing barely changes price over its life, and the within transformation that
+removes latent quality also removes almost everything the instrument had to
+work with. The pipeline detects this and falls back to fixed effects rather
+than reporting a weak-IV estimate as causal.
+
+Pooled OLS returning -0.002 is its own finding: on this data, ignoring
+confounding does not merely bias the elasticity, it erases it.
+
+**Most categories cannot be priced.** Only 3 of 20 clear the bar of being
+credibly below -1 (`cool_stuff` -1.44, `watches_gifts` -1.22, `perfumery`
+-1.20). The rest are inelastic as measured, where the constant-elasticity
+margin has no interior optimum and a "recommendation" would just be the edge of
+whatever band it was given. Two categories show positive point estimates, both
+with |t| < 1 -- noise, not Giffen goods.
+
+That leaves 75 products, **23% of panel revenue**, as the priceable portfolio:
+
+| | Margin | Revenue | Volume | Average price |
+|---|---|---|---|---|
+| With guardrails | **+7.56%** | -1.04% | -6.01% | +5.00% (cap binding) |
+| Without guardrails | +33.34% | -6.66% | -28.03% | +30.00% (band edge) |
+
+**The guardrails cost 25.8 pp here, against 0.0 pp on synthetic data.** That
+inversion is the argument for the solver: when demand is close to inelastic,
+the unconstrained optimum runs to the edge of the price band and the policy
+constraints stop being paperwork -- they become the entire decision.
+
+| Policy | Margin uplift | Volume | Average price |
+|---|---|---|---|
+| None (per-product optimum) | +33.34% | -28.03% | +30.00% |
+| Base policy | +7.56% | -6.01% | +5.00% |
+| Grow volume 10% | +3.64% | +10.00% | +5.00% |
+| Grow volume 10% + cut average price 3% | **-5.60%** | +10.00% | -3.00% |
+
+The last row is worth stating plainly: that mandate does not cost margin
+growth, it destroys margin.
+
+**And the cost assumption drives the size of the prize.** Olist records no
+costs, so a gross margin has to be assumed, and the optimum is proportional to
+it:
+
+| Assumed gross margin | 20% | 30% | 35% | 45% | 60% |
+|---|---|---|---|---|---|
+| Margin uplift | +17.52% | +9.76% | +7.56% | +4.62% | +2.15% |
+
+The recommended average price change is +5.00% in every one of those scenarios,
+pinned by the guardrail. So the *direction* is robust to the assumption and the
+*magnitude* is almost entirely a function of it. Reporting the 7.56% without
+that table would be reporting an assumption as a result.
+
 ### Is the conclusion robust?
 
-The same price list, re-scored against elasticities scaled from 0.6x to 1.4x:
+The synthetic price list, re-scored against elasticities scaled from 0.6x to
+1.4x:
 
 | Elasticity scale | 0.6x | 0.8x | 1.0x | 1.2x | 1.4x |
 |---|---|---|---|---|---|
@@ -109,10 +180,11 @@ range rather than a single number.
 ## Stack
 
 - Python 3.12
-- pandas, numpy — panel construction
-- statsmodels — OLS, fixed effects, clustered standard errors
+- pandas, numpy — panel construction and the two-way within transformation
+- statsmodels — OLS with cluster-robust standard errors
 - PuLP + CBC — mixed-integer price optimization
-- PyTorch + sentence-transformers — review-text model
+- PyTorch — the review-scoring heads
+- sentence-transformers — frozen multilingual encoder (optional extra)
 - pytest, ruff, GitHub Actions
 
 ## Project structure
@@ -133,7 +205,7 @@ src/pricing/
   evaluate/
     validation.py            estimator recovery against the known truth
     impact.py                uplift, guardrail frontier, sensitivity
-tests/                       18 tests: estimators, optimizer, review model
+tests/                       22 tests: estimators, optimizer, gates, review model
 data/raw/                    Olist CSVs (not committed)
 reports/                     generated CSV outputs
 ```
@@ -314,6 +386,9 @@ The test suite locks the properties that matter:
 - an unchanged price list scores exactly zero uplift
 - the demo's "keyword-free" reviews really do match neither lexicon, so the
   accuracy it reports stays held out
+- a weak instrument is refused and the pipeline falls back to fixed effects
+- positive and inelastic category estimates never reach the optimiser
+- infeasible guardrails raise instead of returning a phantom solution
 
 CI runs lint, the tests, and the estimator-recovery experiment on every push,
 so the table in this README is re-proved rather than pasted.
@@ -342,20 +417,29 @@ so the table in this README is re-proved rather than pasted.
 
 - **No counterfactual exists.** Nobody re-ran 2017 at different prices, so the
   uplift is what the estimated demand curve implies, not a measured outcome.
-  The sensitivity table is the honest bound on that claim.
-- **Olist records no costs.** The real-data run needs a margin assumption, and
-  the answer moves with it. The synthetic run avoids this by generating costs.
+- **Olist cannot identify a causal elasticity.** With 1.1% of price variance
+  within-product the instrument is dead on arrival, so the real-data estimate
+  rests on fixed effects and the assumption that week-to-week price moves are
+  not driven by demand. The synthetic experiment shows exactly how much bias
+  survives when that assumption fails.
+- **Olist records no costs.** The margin-rate assumption sets the size of the
+  uplift, as the sensitivity table shows. Only the direction is robust to it.
+- **77% of the panel revenue is not priced at all**, because its elasticity is
+  not credibly below -1. That is a real answer, not a gap to be filled by
+  lowering the bar.
 - **Cross-price effects are ignored.** Products are treated as independent, so
   cannibalization between substitutes is not modelled.
 - **Constant elasticity is a strong functional form.** It cannot represent
   reference-price effects, thresholds, or asymmetry between increases and cuts.
-- **The Hausman instrument is defensible, not airtight.** It buys consistency
-  in exchange for an exclusion restriction that cannot be tested here.
 
 ## About
 
 An academic study project on causal inference and optimization applied to
-retail pricing, built on the public Olist Brazilian e-commerce dataset. The
-emphasis is on the parts that usually get skipped: validating an estimator
-against a known truth, and measuring what a wrong estimate costs once a
-decision depends on it.
+retail pricing, built on the public Olist Brazilian e-commerce dataset.
+
+The emphasis is on the parts that usually get skipped: validating an estimator
+against a known truth before trusting it, measuring what a wrong estimate costs
+once a decision depends on it, and letting the pipeline decline to answer where
+the data does not support one. On this dataset that last part does most of the
+work -- the instrument is refused, 17 of 20 categories are refused, and what
+survives is a bounded recommendation over a quarter of the portfolio.
