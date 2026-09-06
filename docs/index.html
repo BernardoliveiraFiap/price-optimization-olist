@@ -173,6 +173,9 @@ svg{display:block;width:100%;height:auto;overflow:visible}
 .traps h3{margin-top:1.6rem}
 .traps p{max-width:62ch}
 .traps table{min-width:0}
+/* A fixed 7.5rem gutter eats too much of a 1024px laptop: the columns fell to
+   403px. Step it down before the layout stacks. */
+@media(max-width:1180px){.traps{gap:4rem}}
 @media(max-width:880px){.traps{grid-template-columns:1fr;gap:.6rem}}
 
 /* ---- terminal run control ----------------------------------------------- */
