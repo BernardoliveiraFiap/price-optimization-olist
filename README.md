@@ -4,6 +4,7 @@ Estimating price elasticity from observational marketplace data, and turning
 that estimate into a constrained price list with a margin number attached.
 
 ### **[-> Read the project walkthrough](https://bernardoliveirafiap.github.io/price-optimization-olist/)**
+https://bernardoliveirafiap.github.io/price-optimization-olist/
 
 A single page covering the problem, the architecture, what each module does,
 the real output of every command, and the charts behind the numbers below.
