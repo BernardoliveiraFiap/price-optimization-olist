@@ -145,3 +145,49 @@ def cost_of_naive_elasticity(
         out["margin_uplift_pct"].max() - out["margin_uplift_pct"]
     )
     return out
+
+
+def sensitivity_to_elasticity(
+    products: pd.DataFrame,
+    beta_belief: dict[str, float] | float,
+    scale_grid: tuple[float, ...] = (0.6, 0.8, 1.0, 1.2, 1.4),
+    config: OptimisationConfig | None = None,
+) -> pd.DataFrame:
+    """How much does the uplift move if the demand curve is wrong?
+
+    The price list is fixed (optimised once, under ``beta_belief``) and then
+    re-scored against elasticities scaled up and down. A conclusion that
+    survives a 40% error in beta is worth acting on; one that does not is a
+    conclusion about the model, not about the market.
+    """
+    cfg = config or OptimisationConfig()
+    p = products.copy()
+    if isinstance(beta_belief, dict):
+        fallback = float(np.mean(list(beta_belief.values())))
+        p["elasticity"] = p["category"].map(beta_belief).fillna(fallback)
+    else:
+        p["elasticity"] = float(beta_belief)
+
+    result = optimise_prices(p, cfg)
+
+    rows = []
+    for scale in scale_grid:
+        if isinstance(beta_belief, dict):
+            truth = {k: v * scale for k, v in beta_belief.items()}
+        else:
+            truth = float(beta_belief) * scale
+        scored = evaluate_policy(result.prices, truth, cfg.margin_rate)
+        rows.append(
+            {
+                "elasticity_scale": scale,
+                "assumed_beta_mean": (
+                    float(np.mean(list(beta_belief.values())))
+                    if isinstance(beta_belief, dict)
+                    else float(beta_belief)
+                )
+                * scale,
+                **{k: scored[k] for k in
+                   ("margin_uplift_pct", "revenue_uplift_pct", "volume_change_pct")},
+            }
+        )
+    return pd.DataFrame(rows)
