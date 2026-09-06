@@ -109,10 +109,11 @@ range rather than a single number.
 ## Stack
 
 - Python 3.12
-- pandas, numpy — panel construction
-- statsmodels — OLS, fixed effects, clustered standard errors
+- pandas, numpy — panel construction and the two-way within transformation
+- statsmodels — OLS with cluster-robust standard errors
 - PuLP + CBC — mixed-integer price optimization
-- PyTorch + sentence-transformers — review-text model
+- PyTorch — the review-scoring heads
+- sentence-transformers — frozen multilingual encoder (optional extra)
 - pytest, ruff, GitHub Actions
 
 ## Project structure
