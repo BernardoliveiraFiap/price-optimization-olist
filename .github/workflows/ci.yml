@@ -14,6 +14,10 @@ jobs:
         with:
           python-version: "3.12"
           cache: pip
+      # CPU wheel first: the default index would pull the CUDA build and
+      # spend several minutes downloading GPU libraries the runner has no
+      # use for.
+      - run: pip install torch --index-url https://download.pytorch.org/whl/cpu
       - run: pip install -r requirements-dev.txt
       - run: ruff check src tests
       - run: pytest
