@@ -177,12 +177,46 @@ The sign survives a 40% error in the demand curve; the magnitude does not.
 That is the honest reading, and it is why the deliverable is a direction and a
 range rather than a single number.
 
+### Can a machine-learning model do this instead?
+
+This is the question a stakeholder always asks, so the repository answers it
+with a fitted model rather than an opinion. A gradient-boosted tree is trained
+to forecast weekly quantity, validated on **expanding windows over calendar
+weeks** — never a random `KFold`, which on panel data would train on week 40 to
+predict week 12 of the same product.
+
+| Model | RMSE | MAE | Implied elasticity |
+|---|---|---|---|
+| Persistence (last week) | 0.7155 | 0.4880 | — |
+| Ridge | 0.5739 | 0.4627 | — |
+| **Gradient boosting** | **0.4489** | **0.3360** | **-0.281** |
+| Gradient boosting, no history | 0.4670 | 0.3477 | **-0.050** |
+| *Two-way fixed effects (causal)* | — | — | *-0.756* |
+
+The tree cuts forecast error by **37%** against the naive baseline. Then it is
+asked the pricing question — hold everything fixed, move `log_price`, measure
+the response — and it answers **-0.281**, less than half the credible
+elasticity. Strip the lag features and it collapses to **-0.050**, which is
+naive OLS's `-0.002` all over again, reached by a completely different model
+class.
+
+**The best forecaster is the worst pricing model, and the gap is not small.**
+Acting on -0.281 would price as if demand barely reacts.
+
+There is a second reading worth having. The variant *with* history is the less
+biased of the two, which looks backwards until you notice what lagged demand
+is: a product's own recent sales encode its latent quality, so the lags absorb
+unit-level heterogeneity the way a fixed effect does — badly, but not by
+nothing. The features that make the model a good forecaster are the same ones
+that partially clean its elasticity, and neither effect was designed.
+
 ## Stack
 
 - Python 3.12
 - pandas, numpy — panel construction and the two-way within transformation
 - statsmodels — OLS with cluster-robust standard errors
 - PuLP + CBC — mixed-integer price optimization
+- scikit-learn — gradient-boosted demand forecaster and the time-series folds
 - PyTorch — the review-scoring heads
 - sentence-transformers — frozen multilingual encoder (optional extra)
 - pytest, ruff, GitHub Actions
@@ -198,6 +232,7 @@ src/pricing/
   elasticity/
     loglog_fe.py             pooled OLS, two-way FE, 2SLS with clustered SEs
   demand/
+    ml_forecast.py           GBM demand forecast + the elasticity it implies
     review_nlp.py            review text -> product quality vs delivery signal
     demo_reviews.py          runnable sample: the text path without Kaggle
   optimize/
@@ -205,7 +240,8 @@ src/pricing/
   evaluate/
     validation.py            estimator recovery against the known truth
     impact.py                uplift, guardrail frontier, sensitivity
-tests/                       22 tests: estimators, optimizer, gates, review model
+tests/                       30 tests: estimators, optimizer, gates,
+                             review model, forecaster leakage
 data/raw/                    Olist CSVs (not committed)
 reports/                     generated CSV outputs
 ```
@@ -270,6 +306,13 @@ python -m pricing.data --level product
 
 ```bash
 python -m pricing.pipeline --source olist
+```
+
+Forecast comparison and the elasticity the fitted model implies (needs the
+panel built above):
+
+```bash
+python -m pricing.demand.ml_forecast --folds 4
 ```
 
 The review-text model on a built-in sample (downloads the encoder on first

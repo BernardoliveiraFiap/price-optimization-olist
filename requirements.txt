@@ -3,6 +3,7 @@ pandas>=2.2,<3
 pyarrow>=15          # parquet engine for the cached panel
 scipy>=1.11          # required by statsmodels
 statsmodels>=0.14
+scikit-learn>=1.4    # gradient-boosted forecaster + expanding-window folds
 pulp>=2.8,<4
 # Review-text model. Install the CPU wheel to avoid pulling CUDA:
 #   pip install torch --index-url https://download.pytorch.org/whl/cpu
