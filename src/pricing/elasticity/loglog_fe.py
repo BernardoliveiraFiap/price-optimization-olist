@@ -237,3 +237,29 @@ def estimate_iv(
         n_units=int(d["unit_id"].nunique()),
         diagnostics={"first_stage_F": first_stage_f},
     )
+
+
+def estimate_by_category(
+    df: pd.DataFrame,
+    estimator=estimate_twoway_fe,
+    min_obs: int = 200,
+    min_units: int = 5,
+) -> pd.DataFrame:
+    """Run an estimator separately per category.
+
+    Heterogeneous elasticities are what make the optimiser interesting: a
+    single portfolio-wide number would push every price in the same direction.
+    """
+    rows = []
+    for category, chunk in df.groupby("category", observed=True):
+        if len(chunk) < min_obs or chunk["unit_id"].nunique() < min_units:
+            continue
+        try:
+            res = estimator(chunk)
+        except Exception as exc:  # pragma: no cover - defensive
+            rows.append(
+                {"category": category, "elasticity": np.nan, "error": str(exc)}
+            )
+            continue
+        rows.append({"category": category, **res.as_row()})
+    return pd.DataFrame(rows).sort_values("elasticity").reset_index(drop=True)
