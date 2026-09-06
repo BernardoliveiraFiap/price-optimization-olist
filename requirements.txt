@@ -8,3 +8,6 @@ linearmodels>=6.0
 statsmodels>=0.14
 pulp>=2.8,<4
 matplotlib>=3.8
+# Review-text model. Install the CPU wheel to avoid pulling CUDA:
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
