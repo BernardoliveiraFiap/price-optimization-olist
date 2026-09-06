@@ -273,7 +273,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       <div class="step">
         <div class="step-n">1</div>
         <h4 data-i18n="approach.s1h">Estimate</h4>
-        <p data-i18n="approach.s1p">Three estimators making progressively weaker assumptions about where prices came from: pooled OLS, two-way fixed effects, and 2SLS with a cost instrument. Three numbers reveal the size of the bias; one number reveals nothing.</p>
+        <p data-i18n="approach.s1p">Three estimators, each assuming less about where prices came from. Three numbers reveal the size of the bias; one number reveals nothing.</p>
       </div>
       <div class="step">
         <div class="step-n">2</div>
@@ -562,11 +562,11 @@ const TRANSLATIONS = {
 
     "approach.kicker":"The approach","approach.h2":"Estimate, validate, decide, price the error",
     "approach.intro":"Four steps, plus a fifth property that turned out to matter more than any of them: the pipeline is allowed to say <em>no</em>.",
-    "approach.s1h":"Estimate","approach.s1p":"Three estimators making progressively weaker assumptions about where prices came from: pooled OLS, two-way fixed effects, and 2SLS with a cost instrument. Three numbers reveal the size of the bias; one number reveals nothing.",
-    "approach.s2h":"Validate","approach.s2p":"A synthetic market is generated whose true elasticity is <strong>written before anything is fitted</strong>. On real data the answer is unobservable, so &ldquo;my model says &minus;1.4&rdquo; cannot be checked by anyone. Here it can.",
-    "approach.s3h":"Decide","approach.s3p":"A mixed-integer program picks one price per product from a discrete grid, subject to every portfolio guardrail at once. The output is a price list a team could execute, not a coefficient.",
-    "approach.s4h":"Price the error","approach.s4p":"How much margin is lost by acting on the biased estimate, and how fast the conclusion decays if the demand curve is wrong. This is the step that connects statistics to money.",
-    "approach.s5h":"Refuse","approach.s5p":"Two gates stand between an estimate and a price list, and <strong>on the real data both fire</strong>. An instrument with a first-stage F below 10 is not used; a category that is not credibly elastic is not priced. <strong>77% of panel revenue receives no recommendation</strong> &mdash; the correct answer, not a gap to fill by lowering the bar.",
+    "approach.s1h":"Estimate","approach.s1p":"Three estimators, each assuming less about where prices came from. Three numbers reveal the size of the bias; one number reveals nothing.",
+    "approach.s2h":"Validate","approach.s2p":"A synthetic market whose true elasticity is <strong>written before anything is fitted</strong>. On real data nobody can check &ldquo;my model says &minus;1.4&rdquo;. Here they can.",
+    "approach.s3h":"Decide","approach.s3p":"A mixed-integer program picks one price per product under every guardrail at once. The output is a price list a team could execute, not a coefficient.",
+    "approach.s4h":"Price the error","approach.s4p":"What the biased estimate costs in margin, and how fast the conclusion decays if the curve is wrong. The step that connects statistics to money.",
+    "approach.s5h":"Refuse","approach.s5p":"Two gates sit between an estimate and a price list, and <strong>on the real data both fire</strong>. <strong>77% of panel revenue gets no recommendation</strong> &mdash; the correct answer, not a gap to fill by lowering the bar.",
 
     "arch.kicker":"Architecture","arch.h2":"How the pieces connect",
     "arch.intro":"Two entry points feed the same chain: a synthetic market where the truth is known, and the real Olist CSVs. Every stage is a module that can be run and tested alone.",
@@ -661,11 +661,11 @@ const TRANSLATIONS = {
 
     "approach.kicker":"A abordagem","approach.h2":"Estimar, validar, decidir, precificar o erro",
     "approach.intro":"Quatro passos, mais uma quinta propriedade que acabou pesando mais que todas: o pipeline tem permissão para dizer <em>não</em>.",
-    "approach.s1h":"Estimar","approach.s1p":"Três estimadores com hipóteses progressivamente mais fracas sobre de onde vieram os preços: OLS agrupado, efeitos fixos de dupla via e 2SLS com instrumento de custo. Três números revelam o tamanho do viés; um número não revela nada.",
-    "approach.s2h":"Validar","approach.s2p":"Gera-se um mercado sintético cuja elasticidade verdadeira é <strong>escrita antes de qualquer estimação</strong>. No dado real a resposta é inobservável, então &ldquo;meu modelo deu &minus;1,4&rdquo; é uma frase que ninguém pode conferir. Aqui pode.",
-    "approach.s3h":"Decidir","approach.s3p":"Um programa inteiro misto escolhe um preço por produto numa grade discreta, sujeito a todas as travas de carteira ao mesmo tempo. A saída é uma lista de preços executável, não um coeficiente.",
-    "approach.s4h":"Precificar o erro","approach.s4p":"Quanta margem se perde ao agir sobre a estimativa enviesada, e com que velocidade a conclusão se degrada se a curva de demanda estiver errada. É o passo que liga estatística a dinheiro.",
-    "approach.s5h":"Recusar","approach.s5p":"Dois portões separam uma estimativa de uma lista de preços, e <strong>no dado real os dois disparam</strong>. Instrumento com F de primeiro estágio abaixo de 10 não é usado; categoria que não é comprovadamente elástica não é precificada. <strong>77% da receita do painel não recebe recomendação</strong> &mdash; a resposta certa, não uma lacuna a tapar baixando a régua.",
+    "approach.s1h":"Estimar","approach.s1p":"Três estimadores, cada um assumindo menos sobre de onde vieram os preços. Três números revelam o tamanho do viés; um número não revela nada.",
+    "approach.s2h":"Validar","approach.s2p":"Um mercado sintético cuja elasticidade verdadeira é <strong>escrita antes de qualquer estimação</strong>. No dado real ninguém confere &ldquo;meu modelo deu &minus;1,4&rdquo;. Aqui confere.",
+    "approach.s3h":"Decidir","approach.s3p":"Um programa inteiro misto escolhe um preço por produto sob todas as travas ao mesmo tempo. A saída é uma lista executável, não um coeficiente.",
+    "approach.s4h":"Precificar o erro","approach.s4p":"Quanto a estimativa enviesada custa em margem, e com que velocidade a conclusão se degrada se a curva estiver errada. O passo que liga estatística a dinheiro.",
+    "approach.s5h":"Recusar","approach.s5p":"Dois portões separam uma estimativa de uma lista de preços, e <strong>no dado real os dois disparam</strong>. <strong>77% da receita do painel não recebe recomendação</strong> &mdash; a resposta certa, não uma lacuna a tapar baixando a régua.",
 
     "arch.kicker":"Arquitetura","arch.h2":"Como as peças se conectam",
     "arch.intro":"Dois pontos de entrada alimentam a mesma cadeia: um mercado sintético onde a verdade é conhecida, e os CSVs reais do Olist. Cada estágio é um módulo que roda e é testado sozinho.",
