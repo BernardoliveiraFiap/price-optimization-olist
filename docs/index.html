@@ -35,6 +35,11 @@
   --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   --sans:"Space Grotesk","Segoe UI",Arial,sans-serif;
   --maxw:1280px;
+  /* Every card on the page reads off these three, so a heading or a
+     paragraph cannot quietly drift a step away from its neighbours. */
+  --fs-card-title:1.44rem;
+  --fs-card-body:.99rem;
+  --fs-card-meta:.93rem;
 }
 /* The whole page is sized in rem off this root, so one number moves every
    type size together. 110% is the reading size the owner settled on. */
@@ -207,9 +212,9 @@ code{
 .gloss{display:grid;grid-template-columns:repeat(2,1fr);gap:1.15rem 3rem;margin-top:1.8rem}
 @media(max-width:900px){.gloss{grid-template-columns:1fr}}
 .gl{border-top:2px solid var(--line);padding-top:.85rem}
-.gl h4{font-size:1.4rem;font-weight:700;letter-spacing:-.015em;line-height:1.25}
-.gl .full{font-size:.92rem;color:var(--green-500);font-weight:600;margin:.1rem 0 .4rem}
-.gl p{font-size:.96rem;line-height:1.6;color:var(--ink-2);margin:0;max-width:none}
+.gl h4{font-size:var(--fs-card-title);font-weight:700;letter-spacing:-.015em;line-height:1.25}
+.gl .full{font-size:var(--fs-card-meta);color:var(--green-500);font-weight:600;margin:.1rem 0 .4rem}
+.gl p{font-size:var(--fs-card-body);line-height:1.6;color:var(--ink-2);margin:0;max-width:none}
 
 /* ---- terminal ----------------------------------------------------------- */
 .term{background:var(--midnight);border-radius:10px;overflow:hidden;margin-top:1.3rem;box-shadow:0 6px 20px rgba(12,43,21,.16)}
@@ -255,10 +260,10 @@ code{
 }
 .readout[open]>summary::before{transform:rotate(45deg)}
 .readout>summary:hover{color:var(--green-500)}
-.readout .cnt{font-weight:400;color:var(--ink-3);font-size:.93rem}
+.readout .cnt{font-weight:400;color:var(--ink-3);font-size:var(--fs-card-meta)}
 .readout ul{list-style:none;padding:0 1.35rem 1.2rem}
 .readout li{
-  font-size:.96rem;line-height:1.6;padding:.6rem 0;border-top:1px solid var(--line);
+  font-size:var(--fs-card-body);line-height:1.6;padding:.6rem 0;border-top:1px solid var(--line);
   display:grid;grid-template-columns:minmax(9rem,15rem) 1fr;gap:1.2rem;
 }
 .readout li:first-of-type{border-top:0;padding-top:.1rem}
@@ -284,10 +289,10 @@ code{
 
 /* ---- charts ------------------------------------------------------------- */
 figure{margin:1.7rem 0 0}
-figcaption{font-size:.92rem;color:var(--ink-3);margin-top:.65rem;max-width:68ch}
+figcaption{font-size:var(--fs-card-body);color:var(--ink-3);margin-top:.65rem;max-width:68ch}
 .chart{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.3rem 1.15rem .9rem}
-.chart h4{font-size:1.42rem;font-weight:600;margin-bottom:.2rem;letter-spacing:-.015em;line-height:1.25}
-.chart .sub{font-size:.88rem;color:var(--ink-3);margin-bottom:.9rem;line-height:1.5}
+.chart h4{font-size:var(--fs-card-title);font-weight:600;margin-bottom:.2rem;letter-spacing:-.015em;line-height:1.25}
+.chart .sub{font-size:var(--fs-card-body);color:var(--ink-3);margin-bottom:.9rem;line-height:1.5}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:2rem}
 @media(max-width:860px){.grid2{grid-template-columns:1fr}}
 /* Nothing may be painted outside the viewBox. A translated label that grew
@@ -347,13 +352,13 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
   background:var(--midnight);color:var(--accent);margin-bottom:.75rem;
 }
 .guard.opt .tag{background:var(--surface-2);color:var(--ink-2)}
-.guard h4{font-size:1.2rem;font-weight:600;letter-spacing:-.015em;line-height:1.25}
+.guard h4{font-size:var(--fs-card-title);font-weight:600;letter-spacing:-.015em;line-height:1.25}
 .guard .num{font-family:var(--mono);font-size:1.55rem;color:var(--green-500);margin:.3rem 0 .05rem}
-.guard .src{font-family:var(--mono);font-size:.71rem;color:var(--ink-3);margin-bottom:.7rem;word-break:break-all}
-.guard p{font-size:.92rem;line-height:1.55;color:var(--ink-2);margin:0 0 .7rem;max-width:none}
+.guard .src{font-family:var(--mono);font-size:var(--fs-card-meta);color:var(--ink-3);margin-bottom:.7rem;word-break:break-all}
+.guard p{font-size:var(--fs-card-body);line-height:1.55;color:var(--ink-2);margin:0 0 .7rem;max-width:none}
 .guard .how{
   margin-top:auto;padding-top:.75rem;border-top:1px dashed var(--line);
-  font-size:.92rem;line-height:1.55;color:var(--ink);
+  font-size:var(--fs-card-body);line-height:1.55;color:var(--ink);
 }
 .guard .how b{color:var(--green-500)}
 
@@ -364,7 +369,7 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
   padding:.9rem 1.1rem;margin:1.1rem 0 0;overflow-x:auto;white-space:nowrap;
 }
 .fx{display:grid;grid-template-columns:1fr;gap:1.1rem;margin-top:1.2rem}
-.fx > div{border-top:2px solid var(--line);padding-top:.7rem;font-size:.95rem;line-height:1.55;color:var(--ink-2)}
+.fx > div{border-top:2px solid var(--line);padding-top:.7rem;font-size:var(--fs-card-body);line-height:1.55;color:var(--ink-2)}
 .fx b{
   display:block;font-family:var(--mono);font-size:1rem;font-weight:500;
   color:var(--midnight);margin-bottom:.2rem;
@@ -415,11 +420,11 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 .lims{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-top:1.7rem}
 @media(max-width:880px){.lims{grid-template-columns:1fr}}
 .lim{background:#fff;border:1px solid var(--line);border-radius:10px;padding:1.2rem 1.3rem 1.3rem}
-.lim h4{font-size:1.38rem;font-weight:600;margin-bottom:.45rem;letter-spacing:-.015em;line-height:1.25}
-.lim p{font-size:.94rem;line-height:1.6;color:var(--ink-2);margin:0;max-width:none}
+.lim h4{font-size:var(--fs-card-title);font-weight:600;margin-bottom:.45rem;letter-spacing:-.015em;line-height:1.25}
+.lim p{font-size:var(--fs-card-body);line-height:1.6;color:var(--ink-2);margin:0;max-width:none}
 .lim .fix{
   margin-top:.9rem;padding-top:.85rem;border-top:1px dashed var(--line);
-  font-size:.92rem;line-height:1.6;color:var(--ink);
+  font-size:var(--fs-card-body);line-height:1.6;color:var(--ink);
 }
 .lim .fix b{
   display:block;font-size:1.05rem;font-weight:700;letter-spacing:.07em;
@@ -438,8 +443,8 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 .step.gate .step-n{background:var(--accent);color:var(--midnight)}
 .step.gate h4{color:#fff}
 .step.gate p{color:rgba(255,255,255,.82)}
-.step h4{font-size:1.44rem;font-weight:600;margin-bottom:.45rem;letter-spacing:-.015em;line-height:1.25}
-.step p{font-size:.99rem;line-height:1.58;color:var(--ink-2);margin:0;max-width:none}
+.step h4{font-size:var(--fs-card-title);font-weight:600;margin-bottom:.45rem;letter-spacing:-.015em;line-height:1.25}
+.step p{font-size:var(--fs-card-body);line-height:1.58;color:var(--ink-2);margin:0;max-width:none}
 /* Five across only while a card is wide enough to hold a sentence. With the
    larger type that floor moved up: below this it drops to two columns
    rather than five 187px towers. */
@@ -748,7 +753,7 @@ gbm              0.4670   0.3477
     <p class="intro" data-i18n="res.intro">Four questions, six charts. Under each one, whether the number is good news or bad news, and for whom.</p>
 
     <h3 data-i18n="res.h3a">Can the estimators find an answer that is already known?</h3>
-    <p data-i18n-html="res.truthBody">This chart needs one sentence of setup, because the rest of the page leans on it. The code builds a market that does not exist, and it builds it by <em>choosing</em> the elasticity: <code>&minus;2.103</code>, written into the generator before any model sees a single row. That number is the answer key. Running the three estimators over that invented market shows how far each one lands from an answer known with certainty, which is exactly the check nobody can run on real data. That is the whole reason the invented market exists.</p>
+    <p data-i18n-html="res.truthBody">This chart needs one sentence of setup, because the rest of the page leans on it. The code builds a market that does not exist, and it builds it by <em>choosing</em> the elasticity: <code>&minus;2.103</code>, written into the generator before any model sees a single row. That number is the answer key. Running the three estimators over that invented market shows how far each one lands from an answer known with certainty, which is exactly the check nobody can run on real data. That is what the invented market is for.</p>
     <figure>
       <div class="chart">
         <h4 data-i18n="res.c1t">Each estimator against the answer key</h4>
@@ -780,7 +785,7 @@ gbm              0.4670   0.3477
           <div class="sub" data-i18n-html="res.c3s">Extra margin under four policies, loosest at the top. The first bar is the textbook formula applied product by product, with no rule stopping it. Taller is not automatically better here</div>
           <div id="c3"></div>
         </div>
-        <figcaption data-i18n-html="res.c3c">Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and 28% of the units walk away. Arithmetically better, commercially unsignable, and that is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.</figcaption>
+        <figcaption data-i18n-html="res.c3c">Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and 28% of the units walk away. Arithmetically better, and no commercial team would sign it off. That is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.</figcaption>
       </figure>
       <figure>
         <div class="chart">
@@ -939,7 +944,7 @@ const TRANSLATIONS = {
     "res.kicker":"Results","res.h2":"What the numbers say",
     "res.intro":"Four questions, six charts. Under each one, whether the number is good news or bad news, and for whom.",
     "res.h3a":"Can the estimators find an answer that is already known?",
-    "res.truthBody":"This chart needs one sentence of setup, because the rest of the page leans on it. The code builds a market that does not exist, and it builds it by <em>choosing</em> the elasticity: <code>&minus;2.103</code>, written into the generator before any model sees a single row. That number is the answer key. Running the three estimators over that invented market shows how far each one lands from an answer known with certainty, which is exactly the check nobody can run on real data. That is the whole reason the invented market exists.",
+    "res.truthBody":"This chart needs one sentence of setup, because the rest of the page leans on it. The code builds a market that does not exist, and it builds it by <em>choosing</em> the elasticity: <code>&minus;2.103</code>, written into the generator before any model sees a single row. That number is the answer key. Running the three estimators over that invented market shows how far each one lands from an answer known with certainty, which is exactly the check nobody can run on real data. That is what the invented market is for.",
     "res.c1t":"Each estimator against the answer key","res.c1s":"20 invented markets, whose true average elasticity was set to &minus;2.103. The dashed line is that answer; a bar that reaches it got the answer right",
     "res.c1c":"Every bar that stops short of the dashed line understates how much demand reacts to price, and understating it is the dangerous direction: it makes a price rise look safer than it really is. Only 2SLS reaches the line, and only 2SLS ever holds the answer inside its confidence interval.",
     "res.h3b":"On the real data, which categories can be priced at all?",
@@ -948,7 +953,7 @@ const TRANSLATIONS = {
     "res.c2c":"Seventeen categories sit short of the threshold or carry a margin of error too wide to act on. Two come out with the wrong sign entirely, claiming people buy more when the price goes up, which is a symptom of the confound rather than a finding. The pipeline prices the three on the left and declines the rest.",
     "res.h3d":"What do the guardrails cost, and how much of the answer is an assumption?",
     "res.c3t":"What the guardrails cost","res.c3s":"Extra margin under four policies, loosest at the top. The first bar is the textbook formula applied product by product, with no rule stopping it. Taller is not automatically better here",
-    "res.c3c":"Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and 28% of the units walk away. Arithmetically better, commercially unsignable, and that is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.",
+    "res.c3c":"Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and 28% of the units walk away. Arithmetically better, and no commercial team would sign it off. That is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.",
     "res.c4t":"The margin assumption drives the size","res.c4s":"Olist records no cost, so gross margin has to be assumed. Each bar is one assumption",
     "res.c4c":"The uplift ranges from +17.5% to +2.2% depending on a number the data cannot supply. Every bar is positive, so the direction survives any assumption; the size does not. This is the project's biggest weakness, and it is published as a table in the README rather than buried.",
     "res.h3c":"The best forecaster is the worst pricing model",
@@ -970,7 +975,7 @@ const TRANSLATIONS = {
     "ch.true":"true","ch.threshold":"threshold","ch.credibleRef":"credible",
     "ch.bias":"bias","ch.cov":"interval covers the truth",
     "ch.noGuard":"No guardrails","ch.basePolicy":"Base policy",
-    "ch.volUp":"also: volume must grow 10%","ch.priceDown":"and: average price &minus;3%",
+    "ch.volUp":"plus: volume +10%","ch.priceDown":"and: average price &minus;3%",
     "ch.avgPrice":"average price","ch.volume":"volume",
     "ch.marginSuffix":"% margin","ch.headline":"the headline figure",
     "ch.persistence":"Repeat last week","ch.ridge":"Ridge regression","ch.gbm":"Gradient boosting",
@@ -1043,7 +1048,7 @@ const TRANSLATIONS = {
         ["25.79 pp","none","the price of discipline","The gap between the two policies. Not a defect: it is what the ability to say &ldquo;we will not do that&rdquo; costs, and knowing the figure is what makes the trade-off a decision instead of an accident."]
       ],
       [
-        ["persistence  RMSE 0.7155","none","the bar to beat","The dumbest possible forecast: next week equals this week. Any model that cannot beat it is not earning its keep."],
+        ["persistence  RMSE 0.7155","none","the bar to beat","The dumbest possible forecast: next week equals this week. A model that cannot beat it is not worth running."],
         ["gbm  RMSE 0.4489","good","a genuine win at forecasting","Gradient boosting cuts the average miss by 37%. If the job were stock planning, this is the model you would ship."],
         ["implied elasticity: -0.2811","bad","a loss at pricing","Ask that same excellent model what happens if you move the price, and it answers &minus;0.28, roughly a third of the credible &minus;0.756. Acting on it would make a price rise look far safer than it really is."],
         ["price only: -0.0504","bad","the whole argument in one line","Remove the model's memory of past demand and the best forecaster available lands on &minus;0.05, which is the naive regression's answer reached by a completely different family of model. The bias lives in the data, not in the choice of algorithm."],
@@ -1118,12 +1123,12 @@ const TRANSLATIONS = {
     "approach.s1h":"Estimar","approach.s1p":"<strong>Entra:</strong> 16.278 linhas, uma por produto e semana. <strong>Sai:</strong> três respostas para uma pergunta: <code>&minus;0,002</code>, <code>&minus;0,756</code>, <code>+58,4</code>.",
     "approach.s2h":"Validar","approach.s2p":"<strong>Entra:</strong> um mercado inventado, com a elasticidade verdadeira <code>&minus;2,103</code> escrita antes. <strong>Sai:</strong> o erro de cada estimador.",
     "approach.s3h":"Decidir","approach.s3p":"<strong>Entra:</strong> 75 produtos, 11 preços candidatos cada. <strong>Sai:</strong> um preço por produto, com as quatro travas respeitadas.",
-    "approach.s4h":"Precificar o erro","approach.s4p":"<strong>Entra:</strong> a estimativa enviesada e a crível. <strong>Sai:</strong> a margem perdida por confiar na errada, e a faixa atrás do número de capa.",
+    "approach.s4h":"Precificar o erro","approach.s4p":"<strong>Entra:</strong> a estimativa enviesada e a crível. <strong>Sai:</strong> a margem perdida por confiar na errada, e a faixa em volta do número principal.",
     "approach.s5h":"Recusar","approach.s5p":"Dois filtros. Um <button class=\"dfn\" data-def=\"f\" type=\"button\">F</button> abaixo de 10 mata o instrumento; categoria fraca ou incerta fica sem preço. Os dois barram: <strong>77% da receita fica sem recomendação</strong>.",
 
     "arch.kicker":"Arquitetura","arch.h2":"Como as peças se conectam",
     "arch.intro":"Leia da esquerda para a direita, na ordem numerada. Dois pontos de entrada alimentam a mesma cadeia: um mercado sintético onde a resposta certa é conhecida de antemão, e os arquivos CSV reais do Olist. Cada caixa é um módulo que roda e é testado sozinho, e a linha embaixo de cada caixa diz o que ela faz.",
-    "arch.cap":"O ramo sintético existe para dar como pegar um estimador errando, antes de alguém confiar nele. O ramo real é onde o filtro barra.",
+    "arch.cap":"O ramo sintético existe para pegar um estimador errando antes de alguém confiar nele. O ramo real é onde o filtro barra.",
     "arch.legMain":"Cadeia principal: o dado entra de um lado e uma lista de preços sai do outro",
     "arch.legSide":"Apoio: alimenta a cadeia sem fazer parte dela",
     "arch.gateLbl":"A caixa 3, o filtro, é onde este projeto se justifica",
@@ -1152,14 +1157,14 @@ const TRANSLATIONS = {
     "run.pb":"Mesmo código, arquivos reais, e desta vez sem gabarito nenhum. É aqui que a resposta honesta acaba sendo uma recusa.",
     "run.nb":"Os dois filtros barram nesta única execução: o instrumento é rejeitado pelo F de primeiro estágio, e 17 de 20 categorias ficam sem recomendação.",
     "run.h3c":"3. Perguntar se aprendizado de máquina substituiria tudo isso",
-    "run.pc":"O teste justo do &ldquo;por que não jogar um modelo nisso?&rdquo;, rodado no mesmo painel real.",
+    "run.pc":"A resposta honesta para &ldquo;por que não jogar um modelo nisso?&rdquo;, rodada no mesmo painel real.",
     "run.nc":"A árvore corta 37% do erro de previsão e ainda assim implica uma elasticidade que é menos da metade da estimativa crível. Tire dela a memória da demanda passada e ela lê &minus;0,05, que é a regressão ingênua de novo, alcançada por uma família de modelo completamente diferente.",
     "readout.lbl":"Como ler esta saída","readout.lines":"linhas, uma a uma",
 
     "res.kicker":"Resultados","res.h2":"O que os números dizem",
     "res.intro":"Quatro perguntas, seis gráficos. Embaixo de cada um, se o número é notícia boa ou ruim, e para quem.",
     "res.h3a":"Os estimadores conseguem achar uma resposta que já é conhecida?",
-    "res.truthBody":"Este gráfico precisa de uma frase de contexto, porque o resto da página se apoia nele. O código constrói um mercado que não existe, e constrói <em>escolhendo</em> a elasticidade: <code>&minus;2,103</code>, escrita no gerador antes de qualquer modelo ver uma única linha. Esse número é o gabarito. Rodar os três estimadores nesse mercado inventado mostra a que distância cada um parou de uma resposta conhecida com certeza, que é justamente a conferência que ninguém consegue fazer no dado real. É a razão inteira de o mercado inventado existir.",
+    "res.truthBody":"Este gráfico precisa de uma frase de contexto, porque o resto da página se apoia nele. O código constrói um mercado que não existe, e constrói <em>escolhendo</em> a elasticidade: <code>&minus;2,103</code>, escrita no gerador antes de qualquer modelo ver uma única linha. Esse número é o gabarito. Rodar os três estimadores nesse mercado inventado mostra a que distância cada um parou de uma resposta conhecida com certeza, que é justamente a conferência que ninguém consegue fazer no dado real. É exatamente para isso que o mercado inventado existe.",
     "res.c1t":"Cada estimador contra o gabarito","res.c1s":"20 mercados inventados, cuja elasticidade média verdadeira foi definida em &minus;2,103. A linha tracejada é essa resposta; a barra que chega nela acertou",
     "res.c1c":"Toda barra que para antes da linha tracejada subestima o quanto a demanda reage a preço, e subestimar é a direção perigosa: faz um aumento parecer mais seguro do que ele realmente é. Só o 2SLS alcança a linha, e só ele segura a resposta dentro do intervalo de confiança.",
     "res.h3b":"No dado real, quais categorias podem ser precificadas?",
@@ -1168,7 +1173,7 @@ const TRANSLATIONS = {
     "res.c2c":"Dezessete categorias param antes do limiar ou carregam uma margem de erro larga demais para agir. Duas saem com o sinal trocado, dizendo que as pessoas compram mais quando o preço sobe, o que é sintoma da variável escondida e não uma descoberta. O pipeline precifica as três da esquerda e recusa o resto.",
     "res.h3d":"Quanto custam as travas, e quanto da resposta é hipótese?",
     "res.c3t":"Quanto custam as travas","res.c3s":"Margem extra sob quatro políticas, da mais frouxa em cima. A primeira barra é a fórmula de manual aplicada produto a produto, sem nenhuma regra segurando. Mais alto não é automaticamente melhor aqui",
-    "res.c3c":"Deixar a fórmula fazer o que quer mais que quadruplica o ganho, e ela chega lá empurrando todo preço para o topo da faixa de &plusmn;30%: a cesta média sobe 30% e 28% das unidades vão embora. Aritmeticamente melhor, comercialmente inassinável, e é esse o argumento para existir um solver. A última barra é negativa porque as duas exigências extras dela, crescer volume <em>e</em> baixar o preço médio, não cabem juntas sem abrir mão de margem. Escolher entre estas quatro linhas é a decisão de verdade.",
+    "res.c3c":"Deixar a fórmula fazer o que quer mais que quadruplica o ganho, e ela chega lá empurrando todo preço para o topo da faixa de &plusmn;30%: a cesta média sobe 30% e 28% das unidades vão embora. Aritmeticamente melhor, e nenhum time comercial assinaria embaixo. É esse o argumento para existir um solver. A última barra é negativa porque as duas exigências extras dela, crescer volume <em>e</em> baixar o preço médio, não cabem juntas sem abrir mão de margem. Escolher entre estas quatro linhas é a decisão de verdade.",
     "res.c4t":"A hipótese de margem comanda o tamanho","res.c4s":"O Olist não registra custo, então a margem bruta precisa ser assumida. Cada barra é uma hipótese",
     "res.c4c":"O ganho vai de +17,5% a +2,2% conforme um número que o dado não pode fornecer. Toda barra é positiva, então a direção sobrevive a qualquer hipótese; o tamanho não. É a maior fraqueza do projeto, e está publicada em tabela no README em vez de escondida.",
     "res.h3c":"O melhor previsor é o pior modelo de precificação",
@@ -1190,9 +1195,9 @@ const TRANSLATIONS = {
     "ch.true":"verdade","ch.threshold":"limiar","ch.credibleRef":"crível",
     "ch.bias":"viés","ch.cov":"intervalo cobre a verdade",
     "ch.noGuard":"Sem travas","ch.basePolicy":"Política padrão",
-    "ch.volUp":"e mais: volume tem que crescer 10%","ch.priceDown":"e ainda: preço médio &minus;3%",
+    "ch.volUp":"e mais: volume +10%","ch.priceDown":"e ainda: preço médio &minus;3%",
     "ch.avgPrice":"preço médio","ch.volume":"volume",
-    "ch.marginSuffix":"% de margem","ch.headline":"o número de capa",
+    "ch.marginSuffix":"% de margem","ch.headline":"o número principal",
     "ch.persistence":"Repetir a semana anterior","ch.ridge":"Regressão ridge","ch.gbm":"Gradient boosting",
     "ch.gbmNo":"Boosting, só preço","ch.gbmYes":"Boosting, com histórico",
     "ch.vsPersistence":"37% menos erro do que repetir a semana anterior",
@@ -1229,14 +1234,14 @@ const TRANSLATIONS = {
       "confound":["Variável escondida, ou endogeneidade","o terceiro fator que ninguém mediu","A qualidade empurra o preço e as vendas ao mesmo tempo, então comparar preço com vendas na bruta acaba medindo qualidade. É a única razão de a resposta ingênua dar quase zero."],
       "fe":["Efeitos fixos","dar a cada produto e a cada semana a própria linha de base","Em vez de comparar produto caro com produto barato, compara cada produto com ele mesmo ao longo do tempo, e cada semana com ela mesma entre produtos. &ldquo;Nas duas dimensões&rdquo; quer dizer os dois ao mesmo tempo. Isso remove tudo que não muda num produto, qualidade inclusive."],
       "iv":["Instrumento e 2SLS","variável instrumental e mínimos quadrados em dois estágios","Achar algo que mexe no preço mas não tem ligação direta com a demanda (aqui, um índice de custo de frete) e usar só a parte do preço que esse algo explica. O primeiro estágio prevê o preço pelo instrumento, o segundo regride as vendas nessa previsão."],
-      "f":["F de primeiro estágio","o teste de força do instrumento","Quanto da variação de preço o instrumento realmente explica. A régua aceita é F de pelo menos 10. Abaixo disso o instrumento é chamado de fraco, e o resultado dele é pior que inútil porque vem enviesado e com cara de confiante. No painel do Olist ele dá 0,16."],
+      "f":["F de primeiro estágio","o teste de força do instrumento","Quanto da variação de preço o instrumento realmente explica. A regra aceita é um F de pelo menos 10. Abaixo disso o instrumento é chamado de fraco, e o resultado dele é pior que inútil porque vem enviesado e com cara de confiante. No painel do Olist ele dá 0,16."],
       "se":["Erro-padrão e t","a margem de erro e a estatística t","O erro-padrão é a margem de erro em volta da estimativa. A estatística t é a estimativa dividida por essa margem, ou seja, pergunta a quantas margens de erro de distância do zero a resposta está. Acima de mais ou menos 2, é improvável que seja ruído."],
       "ci":["Intervalo de confiança (95%)","a faixa plausível","A faixa onde o valor verdadeiro provavelmente cai. Se ela cruza o zero, você não pode nem afirmar que o efeito existe. Um intervalo que nunca contém a resposta certa é pior do que nenhum, porque parece preciso."],
       "cicd":["CI, o outro","integração contínua","Mesmas duas letras em inglês, coisa sem relação. É o robô do GitHub que reexecuta os 30 testes a cada envio de código, para que as alegações desta página não parem de ser verdade em silêncio."],
       "milp":["MILP","programa linear inteiro misto","Um otimizador que escolhe uma opção por produto dentro de um cardápio fixo (11 preços candidatos para cada), obedece todas as travas ao mesmo tempo, e prova que nenhuma combinação permitida rende mais. O &ldquo;inteiro&rdquo; é o que permite escolher de um cardápio em vez de girar um botão contínuo."],
       "guard":["Trava","uma regra de negócio que a lista de preços não pode furar","Teto no preço médio, piso na receita, piso opcional no volume, faixa em volta de cada preço individual. São a diferença entre uma resposta de planilha e uma que um time comercial assina."],
       "panel":["Painel","os mesmos produtos observados ao longo de muitas semanas","16.278 linhas, cada uma um produto numa semana: quanto custou, quantas unidades saíram. Acompanhar o mesmo produto no tempo é o que torna os efeitos fixos possíveis."],
-      "gbm":["GBM","gradient boosting, ou árvores impulsionadas","Centenas de pequenas árvores de decisão, cada uma construída para corrigir os erros das anteriores. É o previsor de uso geral mais forte para dado em formato de tabela, e é exatamente por isso que o fracasso dele em precificação vale ser mostrado."],
+      "gbm":["GBM","gradient boosting, árvores de decisão encadeadas","Centenas de pequenas árvores de decisão, cada uma construída para corrigir os erros das anteriores. É o previsor de uso geral mais forte para dado em formato de tabela, e é exatamente por isso que o fracasso dele em precificação vale ser mostrado."],
       "rmse":["RMSE e MAE","raiz do erro quadrático médio e erro absoluto médio","Duas formas de medir o quanto uma previsão erra em relação ao que aconteceu. Menor é melhor nas duas. O RMSE pune alguns erros grandes com mais força do que o MAE."],
       "pp":["pp","pontos percentuais","A distância entre duas porcentagens. Cair de +33,34% para +7,56% é uma queda de 25,79 pp, e não de &ldquo;25,79%&rdquo;, que significaria outra coisa."],
       "olist":["Olist","o conjunto de dados","Um marketplace brasileiro que publicou no Kaggle cerca de 100 mil pedidos reais entre 2016 e 2018, em nove arquivos ligados entre si. Preço real, entrega real, avaliação real, e nenhum dado de custo, que é a origem da maior ressalva desta página."]
@@ -1263,7 +1268,7 @@ const TRANSLATIONS = {
         ["25.79 pp","none","o preço da disciplina","A distância entre as duas políticas. Não é defeito: é o que custa poder dizer &ldquo;isso a gente não vai fazer&rdquo;, e saber o valor é o que transforma o trade-off em decisão em vez de acidente."]
       ],
       [
-        ["persistence  RMSE 0.7155","none","a régua a bater","A previsão mais burra possível: a semana que vem é igual a esta. Qualquer modelo que não bata isso não está pagando o próprio custo."],
+        ["persistence  RMSE 0.7155","none","o mínimo a superar","A previsão mais burra possível: a semana que vem é igual a esta. Qualquer modelo que não ganhe dela não justifica a própria existência."],
         ["gbm  RMSE 0.4489","good","vitória real na previsão","O gradient boosting corta 37% do erro médio. Se o trabalho fosse planejar estoque, é este o modelo que você colocaria em produção."],
         ["implied elasticity: -0.2811","bad","derrota na precificação","Pergunte a esse mesmo modelo excelente o que acontece se você mexer no preço, e ele responde &minus;0,28, cerca de um terço do &minus;0,756 crível. Agir por ele faria um aumento parecer muito mais seguro do que ele realmente é."],
         ["price only: -0.0504","bad","o argumento inteiro numa linha","Tire do modelo a memória da demanda passada e o melhor previsor disponível cai em &minus;0,05, que é a resposta da regressão ingênua alcançada por uma família de modelo completamente diferente. O viés mora no dado, não na escolha do algoritmo."],
@@ -1513,9 +1518,22 @@ document.querySelectorAll(".term").forEach(term => {
 });
 
 /* ================================================================ charts */
+/* SVG <text> takes textContent, which does not decode HTML entities, so a
+   translated label carrying "&minus;" used to print those eight characters
+   verbatim and run over its own value. */
+const plain = (() => {
+  const box = document.createElement("textarea");
+  return (str) => { box.innerHTML = String(str); return box.value; };
+})();
+
 const NS = "http://www.w3.org/2000/svg";
 const el = (n, a = {}) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
 const tip = document.getElementById("tip");
+// Which of the palette's bar fills need light text written on top of them.
+const isDark = (hex) => {
+  const n = parseInt(String(hex).slice(1), 16);
+  return ((n >> 16 & 255) * 0.299 + (n >> 8 & 255) * 0.587 + (n & 255) * 0.114) < 150;
+};
 
 function hoverable(node, html) {
   node.addEventListener("mousemove", (ev) => {
@@ -1530,9 +1548,21 @@ function hoverable(node, html) {
 }
 
 function barsH(mount, rows, opts = {}) {
-  const { rowH = 30, gap = 8, ref = null, refLabel = "",
+  const { gap = 8, ref = null, refLabel = "",
           fmt = v => v.toFixed(3), domainPad = 1.18, valueSuffix = "" } = opts;
-  const W = 700, H = rows.length * (rowH + gap) + 46;
+  const W = 700;
+
+  /* The viewBox is a fixed 700 units wide and the browser scales it to the
+     card, so a constant "font-size: 13.5" used to render at 21px in a
+     full-width chart and 10px in a half-width one, which is the whole reason
+     the paired charts looked shrunken. Sizes are stated in rendered pixels
+     here and converted, and the row grows to hold whatever that comes to. */
+  const shown = mount.clientWidth || (mount.parentElement || {}).clientWidth || W;
+  const unit = px => Math.min(px * (W / shown), 34);
+  const LABEL = unit(17), VALUE = unit(15);
+  const rowH = Math.max(opts.rowH || 30, LABEL * 1.7);
+
+  const H = rows.length * (rowH + gap) + Math.max(46, VALUE * 3);
   const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img" });
   mount.innerHTML = ""; mount.appendChild(svg);
 
@@ -1540,11 +1570,11 @@ function barsH(mount, rows, opts = {}) {
      chart against the English strings, so a longer translation pushed its
      own text out of the card and off the page. Labels are drawn first,
      measured, and only then does the plotting area get what is left. */
-  const rowY = i => 8 + i * (rowH + gap) + rowH / 2 + 4.5;
+  const rowY = i => 8 + i * (rowH + gap) + rowH / 2 + LABEL * .36;
   const labels = rows.map((r, i) => {
     const n = el("text", { x: 0, y: rowY(i), "text-anchor": "end",
-      fill: r.dim ? "#6f7578" : "#212427", "font-size": 13.5, "font-weight": r.strong ? 600 : 400 });
-    n.textContent = r.k; svg.appendChild(n);
+      fill: r.dim ? "#6f7578" : "#212427", "font-size": LABEL, "font-weight": r.strong ? 600 : 400 });
+    n.textContent = plain(r.k); svg.appendChild(n);
     return n;
   });
   const widthOf = (n) => n.getComputedTextLength() || n.textContent.length * 7.1;
@@ -1552,7 +1582,7 @@ function barsH(mount, rows, opts = {}) {
   labels.forEach((n, i) => {
     // A label too long even for that column is trimmed; the tooltip on its
     // bar still carries the full text.
-    let txt = rows[i].k;
+    let txt = plain(rows[i].k);
     while (txt.length > 1 && widthOf(n) > labelW - 12) {
       txt = txt.slice(0, -1);
       n.textContent = txt + "…";
@@ -1572,8 +1602,8 @@ function barsH(mount, rows, opts = {}) {
     const rx = sx(ref);
     svg.appendChild(el("line", { x1: rx, x2: rx, y1: 4, y2: H - 32, stroke: "#212427",
       "stroke-width": 2, "stroke-dasharray": "5 4", opacity: .75 }));
-    const tx = el("text", { x: rx, y: H - 12, "text-anchor": "middle", fill: "#4a4f52", "font-size": 12.5 });
-    tx.textContent = refLabel; svg.appendChild(tx);
+    const tx = el("text", { x: rx, y: H - VALUE, "text-anchor": "middle", fill: "#4a4f52", "font-size": VALUE });
+    tx.textContent = plain(refLabel); svg.appendChild(tx);
   }
 
   rows.forEach((r, i) => {
@@ -1585,10 +1615,26 @@ function barsH(mount, rows, opts = {}) {
     hoverable(bar, `<b>${r.k}</b><br>${num(fmt(r.v))}${valueSuffix}${r.note ? "<br>" + r.note : ""}`);
     svg.appendChild(bar);
 
-    const vt = el("text", { x: r.v < 0 ? bx - 8 : bx + bw + 8, y: y + rowH / 2 + 4.5,
-      "text-anchor": r.v < 0 ? "end" : "start", fill: "#4a4f52", "font-size": 12.5,
+    const vt = el("text", { x: r.v < 0 ? bx - 8 : bx + bw + 8, y: y + rowH / 2 + VALUE * .36,
+      "text-anchor": r.v < 0 ? "end" : "start", fill: "#4a4f52", "font-size": VALUE,
       "font-family": "IBM Plex Mono, monospace" });
     vt.textContent = num(fmt(r.v)) + valueSuffix; svg.appendChild(vt);
+
+    /* On a narrow card the number can be wider than the gap beside its bar,
+       where it would either sit on the labels or run off the edge. It moves
+       inside the bar instead, and is dropped outright if the bar cannot hold
+       it either: the bar length and the tooltip still carry the value. */
+    const vw = widthOf(vt);
+    const room = r.v < 0 ? (bx - 8) - labelW : (W - 4) - (bx + bw + 8);
+    if (vw > room) {
+      if (vw + 12 <= bw) {
+        vt.setAttribute("x", r.v < 0 ? bx + 6 : bx + bw - 6);
+        vt.setAttribute("text-anchor", r.v < 0 ? "start" : "end");
+        vt.setAttribute("fill", isDark(r.c || "#197A56") ? "#fff" : "#0C2B15");
+      } else {
+        vt.remove();
+      }
+    }
   });
 }
 
@@ -1664,11 +1710,11 @@ function drawArch() {
       "stroke-dasharray": dashed ? "5 4" : "none" }));
     const tt = el("text", { x: x + w / 2, y: y + (sub ? h / 2 - 2 : h / 2 + 5),
       "text-anchor": "middle", fill: ink, "font-size": 14, "font-weight": 600 });
-    tt.textContent = label; svg.appendChild(tt);
+    tt.textContent = plain(label); svg.appendChild(tt);
     if (sub) {
       const s = el("text", { x: x + w / 2, y: y + h / 2 + 16, "text-anchor": "middle",
         fill: ink, opacity: .7, "font-size": 12, "font-family": "IBM Plex Mono, monospace" });
-      s.textContent = sub; svg.appendChild(s);
+      s.textContent = plain(sub); svg.appendChild(s);
     }
   };
   const arrow = (x1, y1, x2, y2) =>
@@ -1680,7 +1726,7 @@ function drawArch() {
      side boxes, which keeps them clear of the connecting lines. */
   const caption = (cx, top, str, maxChars = 30) => {
     const lines = []; let cur = "";
-    for (const word of String(str).split(" ")) {
+    for (const word of plain(str).split(" ")) {
       const next = cur ? cur + " " + word : word;
       if (next.length > maxChars && cur) { lines.push(cur); cur = word; } else cur = next;
     }
@@ -1720,15 +1766,30 @@ function drawArch() {
   arrow(556, 298, 556, 148);
 
   const note = el("text", { x: 450, y: 428, "text-anchor": "middle", fill: "#6f7578", "font-size": 12.5 });
-  note.textContent = t("arch.note"); svg.appendChild(note);
+  note.textContent = plain(t("arch.note")); svg.appendChild(note);
 
   mount.innerHTML = ""; mount.appendChild(svg);
 }
 
 applyLanguage();
-/* The label column is measured, and a measurement is only final once the web
-   font is the font being measured. Space Grotesk arrives after first paint. */
+/* Two things make a chart measurement go stale, and both redraw it. The web
+   font arrives after first paint, and the type size is derived from the
+   card's rendered width, so a resize leaves every label at the size the
+   old width called for. */
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawCharts);
+let chartResize;
+const redrawCharts = () => { clearTimeout(chartResize); chartResize = setTimeout(drawCharts, 120); };
+addEventListener("resize", redrawCharts);
+/* Watching the card itself rather than the window, because a card can
+   change width without the window doing anything, and because a redraw
+   only changes the height, which cannot retrigger this. */
+if (window.ResizeObserver) {
+  let lastW = 0;
+  new ResizeObserver(([entry]) => {
+    const w = Math.round(entry.contentRect.width);
+    if (w && w !== lastW) { lastW = w; redrawCharts(); }
+  }).observe(document.getElementById("c1").parentElement);
+}
 </script>
 </body>
 </html>
