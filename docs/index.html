@@ -112,7 +112,10 @@ h3{font-size:clamp(1.6rem,2.6vw,2rem);font-weight:600;margin:2.8rem 0 .75rem;let
   -webkit-text-stroke:1.15px rgba(150,248,120,.20);
 }
 .ht-track span.fill{color:rgba(150,248,120,.085);-webkit-text-stroke:0}
-@media(prefers-reduced-motion:reduce){.ht-track{animation:none}}
+/* The backdrop keeps drifting even for a system asking to reduce motion.
+   Owner's call: it is a slow, silent, decorative loop behind a scrim,
+   and a hero frozen mid-word reads as broken. Every other animation on
+   the page still honours the preference. */
 /* Scrim, so the headline never competes with the type behind it. */
 .hero::before{
   content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
