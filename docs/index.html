@@ -38,7 +38,7 @@
 }
 /* The whole page is sized in rem off this root, so one number moves every
    type size together. 110% is the reading size the owner settled on. */
-html{font-size:110%;scroll-behavior:smooth}
+html{font-size:110%;scroll-behavior:smooth;scroll-padding-top:calc(3.6rem + 1px)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   background:var(--surface);color:var(--ink);font-family:var(--sans);
@@ -195,7 +195,9 @@ code{
   transform:rotate(-45deg);transition:transform .15s;
 }
 .foldsec[open] > summary::before{transform:rotate(45deg)}
-.foldsec > summary:hover h2{color:var(--green-500)}
+.foldsec > summary h3{margin:0}
+.foldsec > summary:hover h2,.foldsec > summary:hover h3{color:var(--green-500)}
+.foldsec.inner{margin-top:2.8rem}
 .foldsec .cnt{font-size:1.05rem;color:var(--ink-3);white-space:nowrap}
 
 /* ---- glossary ----------------------------------------------------------- */
@@ -408,18 +410,21 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 /* ---- approach: five steps across ---------------------------------------- */
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:1.8rem}
-.step{background:#fff;padding:1.4rem 1.2rem 1.6rem;display:flex;flex-direction:column}
+.step{background:#fff;padding:1.6rem 1.3rem 1.8rem;display:flex;flex-direction:column}
 .step-n{
-  width:2.1rem;height:2.1rem;border-radius:8px;background:var(--green-500);color:#fff;
-  display:grid;place-items:center;font-weight:700;font-size:.95rem;margin-bottom:.8rem;flex:none;
+  width:2.35rem;height:2.35rem;border-radius:9px;background:var(--green-500);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:1.06rem;margin-bottom:.9rem;flex:none;
 }
 .step.gate{background:var(--midnight)}
 .step.gate .step-n{background:var(--accent);color:var(--midnight)}
 .step.gate h4{color:#fff}
 .step.gate p{color:rgba(255,255,255,.82)}
-.step h4{font-size:1.34rem;font-weight:600;margin-bottom:.35rem;letter-spacing:-.015em;line-height:1.25}
-.step p{font-size:.9rem;line-height:1.55;color:var(--ink-2);margin:0;max-width:none}
-@media(max-width:1000px){.steps{grid-template-columns:repeat(2,1fr)}
+.step h4{font-size:1.44rem;font-weight:600;margin-bottom:.45rem;letter-spacing:-.015em;line-height:1.25}
+.step p{font-size:.99rem;line-height:1.58;color:var(--ink-2);margin:0;max-width:none}
+/* Five across only while a card is wide enough to hold a sentence. With the
+   larger type that floor moved up: below this it drops to two columns
+   rather than five 187px towers. */
+@media(max-width:1200px){.steps{grid-template-columns:repeat(2,1fr)}
   .step.gate{grid-column:1 / -1}}
 @media(max-width:560px){.steps{grid-template-columns:1fr}
   .step.gate{grid-column:auto}}
@@ -516,7 +521,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <details class="foldsec">
       <summary>
         <h2 data-i18n="gloss.h2">Every acronym on this page, in one place</h2>
-        <span class="cnt" data-i18n="gloss.count">16 entries</span>
+        <span class="cnt" id="glossCount"></span>
       </summary>
       <p class="intro" data-i18n="gloss.intro">The rest of the page is readable without a statistics background, provided these are on the table first. Every one of them is also a marked word in the text: click it and the definition opens where you are reading.</p>
       <div class="gloss" id="glossBody"></div>
@@ -583,13 +588,18 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       <p data-i18n-html="arch.gateBody">Every other box computes something. This one decides <strong>whether the pipeline is allowed to answer at all</strong>, and it asks two questions in order. First: is the instrument strong enough to be used, meaning is its <button class="dfn" data-def="f" type="button">first-stage F</button> at least 10? Here it is 0.16, so 2SLS is thrown away and fixed effects carry the estimate. Second, per category: is this elasticity past <code>&minus;1.05</code> and at least twice its own <button class="dfn" data-def="se" type="button">margin of error</button>? Three categories out of twenty say yes. The other seventeen leave with no price, which is why the box is drawn as a wall rather than a step.</p>
     </div>
 
-    <h3 data-i18n="arch.filesH">What each file does</h3>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th data-i18n="arch.thFile">File</th><th data-i18n="arch.thResp">Responsibility</th><th data-i18n="arch.thWhy">Why it exists</th></tr></thead>
-        <tbody id="filesBody"></tbody>
-      </table>
-    </div>
+    <details class="foldsec inner">
+      <summary>
+        <h3 data-i18n="arch.filesH">What each file does</h3>
+        <span class="cnt" id="filesCount"></span>
+      </summary>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th data-i18n="arch.thFile">File</th><th data-i18n="arch.thResp">Responsibility</th><th data-i18n="arch.thWhy">Why it exists</th></tr></thead>
+          <tbody id="filesBody"></tbody>
+        </table>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -861,7 +871,7 @@ const TRANSLATIONS = {
     "problem.guardsIntro":"The <em>portfolio</em> is a concrete list: the <strong>75 products</strong> in the three categories that cleared the gate, 23% of the <button class=\"dfn\" data-def=\"panel\" type=\"button\">panel</button>'s revenue, priced in one shot. Four rules bound what may happen to that list, and all four are constants in <code>config.py</code> rather than numbers invented for a slide. A <strong>ceiling</strong> is the most you are allowed; a <strong>floor</strong> is the least you must keep; a <strong>band</strong> is how far a single price may travel in either direction.",
 
     "gloss.kicker":"Vocabulary","gloss.h2":"Every acronym on this page, in one place",
-    "gloss.count":"16 entries",
+    "gloss.unit":"entries",
     "gloss.intro":"The rest of the page is readable without a statistics background, provided these are on the table first. Every one of them is also a marked word in the text: click it and the definition opens where you are reading.",
 
     "approach.kicker":"The approach","approach.h2":"Estimate, validate, decide, price the error",
@@ -888,7 +898,7 @@ const TRANSLATIONS = {
       "support: forecasts demand, reads the review text",
       "support: sizes the gain and how fragile it is"
     ],
-    "arch.filesH":"What each file does","arch.thFile":"File","arch.thResp":"Responsibility","arch.thWhy":"Why it exists",
+    "arch.filesUnit":"files","arch.filesH":"What each file does","arch.thFile":"File","arch.thResp":"Responsibility","arch.thWhy":"Why it exists",
     "arch.note":"the gate is where 17 of 20 categories stop",
 
     "run.kicker":"Execution","run.h2":"What running it actually prints",
@@ -1081,7 +1091,7 @@ const TRANSLATIONS = {
     "problem.guardsIntro":"A <em>carteira</em> é uma lista concreta: os <strong>75 produtos</strong> das três categorias que passaram no filtro, 23% da receita do <button class=\"dfn\" data-def=\"panel\" type=\"button\">painel</button>, precificados de uma vez só. Quatro regras limitam o que pode acontecer com essa lista, e as quatro são constantes do <code>config.py</code>, não números inventados para um slide. Um <strong>teto</strong> é o máximo que você tem permissão de fazer; um <strong>piso</strong> é o mínimo que você é obrigado a manter; uma <strong>faixa</strong> é o quanto um preço sozinho pode andar para cada lado.",
 
     "gloss.kicker":"Vocabulário","gloss.h2":"Toda sigla desta página, num lugar só",
-    "gloss.count":"16 verbetes",
+    "gloss.unit":"verbetes",
     "gloss.intro":"O resto da página é legível sem formação em estatística, desde que isto aqui esteja na mesa antes. Cada um destes também é uma palavra grifada no texto: clique nela e a explicação abre onde você está lendo.",
 
     "approach.kicker":"A abordagem","approach.h2":"Estimar, validar, decidir, precificar o erro",
@@ -1108,7 +1118,7 @@ const TRANSLATIONS = {
       "apoio: prevê a demanda e lê o texto das avaliações",
       "apoio: mede o ganho e o quanto ele é frágil"
     ],
-    "arch.filesH":"O que cada arquivo faz","arch.thFile":"Arquivo","arch.thResp":"Responsabilidade","arch.thWhy":"Por que existe",
+    "arch.filesUnit":"arquivos","arch.filesH":"O que cada arquivo faz","arch.thFile":"Arquivo","arch.thResp":"Responsabilidade","arch.thWhy":"Por que existe",
     "arch.note":"o filtro é onde 17 de 20 categorias param",
 
     "run.kicker":"Execução","run.h2":"O que rodar de verdade imprime",
@@ -1299,6 +1309,10 @@ function renderRows() {
   document.getElementById("glossBody").innerHTML = Object.values(t("defs"))
     .map(([term, full, body]) => `<div class="gl"><h4>${term}</h4>` +
       `<div class="full">${full}</div><p>${body}</p></div>`).join("");
+  document.getElementById("glossCount").textContent =
+    Object.keys(t("defs")).length + " " + t("gloss.unit");
+  document.getElementById("filesCount").textContent =
+    t("files").length + " " + t("arch.filesUnit");
   document.getElementById("guardsBody").innerHTML = t("guards")
     .map(([kind, tag, name, value, src, forbids, how]) =>
       `<div class="guard${kind === "opt" ? " opt" : ""}"><span class="tag">${tag}</span>` +
