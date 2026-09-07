@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Price Optimization on Brazilian E-Commerce Data</title>
-<meta name="description" content="Estimating price elasticity from observational marketplace data, and turning that estimate into a constrained price list, with a pipeline that is allowed to refuse." />
+<meta name="description" content="Estimating price elasticity from a real marketplace's own history, turning it into a price list that obeys the business rules, with a pipeline that is allowed to refuse." />
 <!-- The author's monogram, the same icon as enzobernardo.com. The paths are
      relative because the site is served from a project subpath, not from the
      domain root, where an absolute /favicon-32.png would 404. -->
@@ -184,6 +184,20 @@ code{
   padding:1px 5px;border-radius:4px;color:var(--midnight);
 }
 
+/* ---- a section that folds away ------------------------------------------
+   Vocabulary is a reference to reach for, not something to read through on
+   the way down the page, so it ships closed behind its own chevron. */
+.foldsec > summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+.foldsec > summary::-webkit-details-marker{display:none}
+.foldsec > summary::before{
+  content:"";flex:none;width:.66rem;height:.66rem;margin-left:.15rem;
+  border-right:3px solid var(--green-500);border-bottom:3px solid var(--green-500);
+  transform:rotate(-45deg);transition:transform .15s;
+}
+.foldsec[open] > summary::before{transform:rotate(45deg)}
+.foldsec > summary:hover h2{color:var(--green-500)}
+.foldsec .cnt{font-size:1.05rem;color:var(--ink-3);white-space:nowrap}
+
 /* ---- glossary ----------------------------------------------------------- */
 .gloss{display:grid;grid-template-columns:repeat(2,1fr);gap:1.15rem 3rem;margin-top:1.8rem}
 @media(max-width:900px){.gloss{grid-template-columns:1fr}}
@@ -344,6 +358,10 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 .traps h3{margin-top:1.8rem}
 .traps p{max-width:62ch}
 .traps table{min-width:0}
+/* The guardrails are a new subject, not the tail of the right-hand column.
+   The gap is what tells the eye to finish both traps first. */
+.traps + h3{margin-top:8rem}
+@media(max-width:880px){.traps + h3{margin-top:5rem}}
 @media(max-width:1180px){.traps{gap:6.5rem}}
 @media(max-width:1000px){.traps{gap:4.5rem}}
 @media(max-width:880px){.traps{grid-template-columns:1fr;gap:3.5rem}}
@@ -388,9 +406,8 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 }
 
 /* ---- approach: five steps across ---------------------------------------- */
-.steps{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:1.8rem}
-.steps .gate{grid-column:1 / -1}
 .step{background:#fff;padding:1.4rem 1.2rem 1.6rem;display:flex;flex-direction:column}
 .step-n{
   width:2.1rem;height:2.1rem;border-radius:8px;background:var(--green-500);color:#fff;
@@ -402,7 +419,10 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 .step.gate p{color:rgba(255,255,255,.82)}
 .step h4{font-size:1.34rem;font-weight:600;margin-bottom:.35rem;letter-spacing:-.015em;line-height:1.25}
 .step p{font-size:.9rem;line-height:1.55;color:var(--ink-2);margin:0;max-width:none}
-@media(max-width:560px){.steps{grid-template-columns:1fr}}
+@media(max-width:1000px){.steps{grid-template-columns:repeat(2,1fr)}
+  .step.gate{grid-column:1 / -1}}
+@media(max-width:560px){.steps{grid-template-columns:1fr}
+  .step.gate{grid-column:auto}}
 
 /* ---- footer ------------------------------------------------------------- */
 footer{background:var(--midnight);color:rgba(255,255,255,.72);padding:3rem 0;font-size:.92rem}
@@ -418,7 +438,6 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <div class="hdr-right">
       <nav>
         <a href="#problem" data-i18n="nav.problem">The problem</a>
-        <a href="#glossary" data-i18n="nav.gloss">Glossary</a>
         <a href="#approach" data-i18n="nav.approach">Approach</a>
         <a href="#architecture" data-i18n="nav.architecture">Architecture</a>
         <a href="#run" data-i18n="nav.run">Execution</a>
@@ -435,7 +454,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
   <div class="wrap">
     <div class="kicker" data-i18n="hero.kicker">Causal inference &middot; Optimization &middot; Machine learning</div>
     <h1 data-i18n="hero.title">Price Optimization on Brazilian <span class="nb">E&#8209;Commerce</span> Data</h1>
-    <p class="lede" data-i18n-html="hero.lede">Estimating price elasticity from observational marketplace data, turning that estimate into a constrained price list, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.</p>
+    <p class="lede" data-i18n-html="hero.lede">Estimating price elasticity from a real marketplace's own history, turning that estimate into a price list that obeys the business rules, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.</p>
     <div class="links">
       <a class="btn btn-primary" href="https://github.com/BernardoliveiraFiap/price-optimization-olist" data-i18n="hero.repo">View the repository</a>
       <a class="btn btn-ghost" href="#run" data-i18n="hero.see">See it run</a>
@@ -468,7 +487,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <p data-i18n-html="problem.t1b">Of course not. The expensive restaurant is expensive <em>because it is good</em>. You did not measure the effect of price; you measured the effect of quality, which was hiding behind price. Statistics has a name for that hidden third thing: a <button class="dfn" data-def="confound" type="button">confound</button>. The same thing happens to products: a seller charges more for exactly the items people want most.</p>
     <div class="callout">
       <div class="lbl" data-i18n="problem.calloutLbl">The direction of the error is always the same</div>
-      <p data-i18n-html="problem.calloutBody">Demand looks <strong>less</strong> price-sensitive than it is. In business terms: raising prices looks safe when it is not. On the <button class="dfn" data-def="olist" type="button">Olist</button> data, a plain <button class="dfn" data-def="ols" type="button">OLS</button> regression returns <code>&beta; = &minus;0.002</code>. Read it out loud and it says a 1% price rise would cost 0.002% of sales, which is to say nothing at all. No market behaves that way. The effect was not shrunk, it was erased.</p>
+      <p data-i18n-html="problem.calloutBody">Demand reacts to price <strong>far more</strong> than this calculation shows. In business terms: raising prices looks safe when it is not. On the <button class="dfn" data-def="olist" type="button">Olist</button> data, a plain <button class="dfn" data-def="ols" type="button">OLS</button> regression returns <code>&beta; = &minus;0.002</code>. Read it out loud and it says a 1% price rise would cost 0.002% of sales, which is to say nothing at all. No market behaves that way. The effect was not shrunk, it was erased.</p>
     </div>
 
      </div>
@@ -494,9 +513,14 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
 <section id="glossary" class="alt">
   <div class="wrap">
     <div class="sec-kicker" data-i18n="gloss.kicker">Vocabulary</div>
-    <h2 data-i18n="gloss.h2">Every acronym on this page, in one place</h2>
-    <p class="intro" data-i18n="gloss.intro">The rest of the page is readable without a statistics background, provided these are on the table first. Each one is spelled out again the first time it appears in the text.</p>
-    <div class="gloss" id="glossBody"></div>
+    <details class="foldsec">
+      <summary>
+        <h2 data-i18n="gloss.h2">Every acronym on this page, in one place</h2>
+        <span class="cnt" data-i18n="gloss.count">16 entries</span>
+      </summary>
+      <p class="intro" data-i18n="gloss.intro">The rest of the page is readable without a statistics background, provided these are on the table first. Every one of them is also a marked word in the text: click it and the definition opens where you are reading.</p>
+      <div class="gloss" id="glossBody"></div>
+    </details>
   </div>
 </section>
 
@@ -511,27 +535,27 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       <div class="step">
         <div class="step-n">1</div>
         <h4 data-i18n="approach.s1h">Estimate</h4>
-        <p data-i18n-html="approach.s1p"><strong>In:</strong> 16,278 rows, each one product in one week. <strong>Out:</strong> three answers to the same question, <code>&minus;0.002</code>, <code>&minus;0.756</code> and <code>+58.4</code>. Three estimators, because one number never reveals the size of its own error.</p>
+        <p data-i18n-html="approach.s1p"><strong>In:</strong> 16,278 rows, one per product and week. <strong>Out:</strong> three answers to one question: <code>&minus;0.002</code>, <code>&minus;0.756</code>, <code>+58.4</code>.</p>
       </div>
       <div class="step">
         <div class="step-n">2</div>
         <h4 data-i18n="approach.s2h">Validate</h4>
-        <p data-i18n-html="approach.s2p"><strong>In:</strong> a market the code invents, its true elasticity <code>&minus;2.103</code> written down before anything is fitted. <strong>Out:</strong> how far each estimator landed from it. On real data this check is impossible.</p>
+        <p data-i18n-html="approach.s2p"><strong>In:</strong> an invented market, true elasticity <code>&minus;2.103</code> written down first. <strong>Out:</strong> how far each estimator missed it.</p>
       </div>
       <div class="step">
         <div class="step-n">3</div>
         <h4 data-i18n="approach.s3h">Decide</h4>
-        <p data-i18n-html="approach.s3p"><strong>In:</strong> today's price of 75 products, 11 candidate prices for each. <strong>Out:</strong> one chosen price per product, obeying all four guardrails at once. A price list, not a coefficient.</p>
+        <p data-i18n-html="approach.s3p"><strong>In:</strong> 75 products, 11 candidate prices each. <strong>Out:</strong> one price per product, all four guardrails obeyed.</p>
       </div>
       <div class="step">
         <div class="step-n">4</div>
         <h4 data-i18n="approach.s4h">Price the error</h4>
-        <p data-i18n-html="approach.s4p"><strong>In:</strong> the biased estimate and the credible one. <strong>Out:</strong> the margin lost by trusting the wrong one, and how far the headline slides when the assumed cost changes: <code>+17.5%</code> down to <code>+2.2%</code>.</p>
+        <p data-i18n-html="approach.s4p"><strong>In:</strong> the biased estimate and the credible one. <strong>Out:</strong> the margin lost by trusting the wrong one, and the range behind the headline.</p>
       </div>
       <div class="step gate">
         <div class="step-n">5</div>
         <h4 data-i18n="approach.s5h">Refuse</h4>
-        <p data-i18n-html="approach.s5p">Two gates. An <button class="dfn" data-def="f" type="button">F</button> below 10 kills the instrument; a category whose estimate is weaker than <code>&minus;1.05</code> or blurrier than twice its own error is left unpriced. Both fire here, so <strong>77% of panel revenue gets no recommendation</strong>. That is the answer, not a hole to plug by lowering the bar.</p>
+        <p data-i18n-html="approach.s5p">Two gates. An <button class="dfn" data-def="f" type="button">F</button> under 10 kills the instrument; a weak or uncertain category gets no price. Both fire: <strong>77% of revenue gets no recommendation</strong>.</p>
       </div>
     </div>
   </div>
@@ -551,7 +575,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
           <span><i style="background:#F1EEEA;border:1px solid #DCD5CE"></i><span data-i18n="arch.legSide">Support: feeds the chain without being part of it</span></span>
         </div>
       </div>
-      <figcaption data-i18n="arch.cap">The synthetic branch exists so the estimator layer can be proven wrong before it is trusted. The real branch is where the gate fires.</figcaption>
+      <figcaption data-i18n="arch.cap">The synthetic branch exists so an estimator can be caught being wrong, before anyone trusts it. The real branch is where the gate fires.</figcaption>
     </figure>
 
     <div class="callout wide">
@@ -683,7 +707,7 @@ gbm              0.4670   0.3477
     </div>
     <p class="term-note" data-i18n="run.raw3">The output stays in English because that is what the program prints. The line-by-line reading is right below.</p>
     <details class="readout" data-readout="2"></details>
-    <p class="term-note" data-i18n="run.nc">The tree cuts forecast error by 37% and still implies an elasticity less than half the credible one. Strip its memory of past demand and it reads &minus;0.05, which is the naive regression all over again, reached by a completely different family of model.</p>
+    <p class="term-note" data-i18n="run.nc">The tree cuts forecast error by 37% and still implies an elasticity less than half of the credible estimate. Strip its memory of past demand and it reads &minus;0.05, which is the naive regression all over again, reached by a completely different family of model.</p>
   </div>
 </section>
 
@@ -702,7 +726,7 @@ gbm              0.4670   0.3477
         <div class="sub" data-i18n="res.c1s">20 invented markets, whose true average elasticity was set to &minus;2.103. The dashed line is that answer; a bar that reaches it got the answer right</div>
         <div id="c1"></div>
       </div>
-      <figcaption data-i18n="res.c1c">Every bar that stops short of the dashed line understates how much demand reacts to price, and understating it is the dangerous direction: it makes a price rise look safer than it is. Only 2SLS reaches the line, and only 2SLS ever contains the truth inside its confidence interval.</figcaption>
+      <figcaption data-i18n="res.c1c">Every bar that stops short of the dashed line understates how much demand reacts to price, and understating it is the dangerous direction: it makes a price rise look safer than it really is. Only 2SLS reaches the line, and only 2SLS ever contains the truth inside its confidence interval.</figcaption>
     </figure>
 
     <h3 data-i18n="res.h3b">On the real data, which categories can be priced at all?</h3>
@@ -719,6 +743,7 @@ gbm              0.4670   0.3477
       <figcaption data-i18n="res.c2c">Seventeen categories sit short of the threshold or carry a margin of error too wide to act on. Two come out with the wrong sign entirely, claiming people buy more when the price goes up, which is a symptom of the confound rather than a finding. The pipeline prices the three on the left and declines the rest.</figcaption>
     </figure>
 
+    <h3 data-i18n="res.h3d">What do the guardrails cost, and how much of the answer is an assumption?</h3>
     <div class="grid2">
       <figure>
         <div class="chart">
@@ -726,7 +751,7 @@ gbm              0.4670   0.3477
           <div class="sub" data-i18n-html="res.c3s">Extra margin under four policies, loosest at the top. The first bar is the textbook formula applied product by product, with no rule stopping it. Taller is not automatically better here</div>
           <div id="c3"></div>
         </div>
-        <figcaption data-i18n-html="res.c3c">Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and a quarter of the units walk away. Arithmetically better, commercially unsignable, and that is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.</figcaption>
+        <figcaption data-i18n-html="res.c3c">Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and 28% of the units walk away. Arithmetically better, commercially unsignable, and that is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.</figcaption>
       </figure>
       <figure>
         <div class="chart">
@@ -752,7 +777,7 @@ gbm              0.4670   0.3477
       <figure>
         <div class="chart">
           <h4 data-i18n="res.c6t">The elasticity each model implies</h4>
-          <div class="sub" data-i18n="res.c6s">Measured by holding everything else fixed and moving only the price. Closer to the dashed line is better</div>
+          <div class="sub" data-i18n="res.c6s">Each bar is the elasticity that comes out when everything else is held fixed and only the price moves. Closer to the dashed line is better</div>
           <div id="c6"></div>
         </div>
         <figcaption data-i18n="res.c6c">And loses the pricing job just as decisively. Both machine-learning bars fall well short of the credible estimate, so acting on either one would under-price the risk of a rise.</figcaption>
@@ -767,7 +792,7 @@ gbm              0.4670   0.3477
   <div class="wrap">
     <div class="sec-kicker" data-i18n="lim.kicker">Limitations</div>
     <h2 data-i18n="lim.h2">What this does not establish</h2>
-    <p class="intro" data-i18n="lim.intro">Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose boundary is known is worth more than one presented without it.</p>
+    <p class="intro" data-i18n="lim.intro">Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose limits are known is worth more than one presented without them.</p>
     <div class="lims" id="limBody"></div>
   </div>
 </section>
@@ -800,12 +825,12 @@ const LANGUAGE_STORAGE_KEY = "price-optimization:language";
 
 const TRANSLATIONS = {
   en: {
-    "nav.problem":"The problem","nav.gloss":"Glossary","nav.approach":"Approach",
+    "nav.problem":"The problem","nav.approach":"Approach",
     "nav.architecture":"Architecture","nav.run":"Execution","nav.results":"Results","nav.limits":"Limitations",
 
     "hero.kicker":"Causal inference &middot; Optimization &middot; Machine learning",
     "hero.title":"Price Optimization on Brazilian <span class=\"nb\">E&#8209;Commerce</span> Data",
-    "hero.lede":"Estimating price elasticity from observational marketplace data, turning that estimate into a constrained price list, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.",
+    "hero.lede":"Estimating price elasticity from a real marketplace's own history, turning that estimate into a price list that obeys the business rules, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.",
     "hero.repo":"View the repository","hero.see":"See it run",
     "hero.s1":"product-week observations","hero.s2":"categories priced, the rest refused",
     "hero.s3":"margin uplift, guardrails respected","hero.s4":"tests, re-run automatically on every push",
@@ -825,7 +850,7 @@ const TRANSLATIONS = {
     "problem.t1a":"Suppose you record the price and the occupancy of a hundred restaurants. The expensive ones are fuller. Does raising prices fill a restaurant?",
     "problem.t1b":"Of course not. The expensive restaurant is expensive <em>because it is good</em>. You did not measure the effect of price; you measured the effect of quality, which was hiding behind price. Statistics has a name for that hidden third thing: a <button class=\"dfn\" data-def=\"confound\" type=\"button\">confound</button>. The same thing happens to products: a seller charges more for exactly the items people want most.",
     "problem.calloutLbl":"The direction of the error is always the same",
-    "problem.calloutBody":"Demand looks <strong>less</strong> price-sensitive than it is. In business terms: raising prices looks safe when it is not. On the <button class=\"dfn\" data-def=\"olist\" type=\"button\">Olist</button> data, a plain <button class=\"dfn\" data-def=\"ols\" type=\"button\">OLS</button> regression returns <code>&beta; = &minus;0.002</code>. Read it out loud and it says a 1% price rise would cost 0.002% of sales, which is to say nothing at all. No market behaves that way. The effect was not shrunk, it was erased.",
+    "problem.calloutBody":"Demand reacts to price <strong>far more</strong> than this calculation shows. In business terms: raising prices looks safe when it is not. On the <button class=\"dfn\" data-def=\"olist\" type=\"button\">Olist</button> data, a plain <button class=\"dfn\" data-def=\"ols\" type=\"button\">OLS</button> regression returns <code>&beta; = &minus;0.002</code>. Read it out loud and it says a 1% price rise would cost 0.002% of sales, which is to say nothing at all. No market behaves that way. The effect was not shrunk, it was erased.",
     "problem.t2h":"Trap 2: an elasticity is not a price",
     "problem.t2a":"Suppose the elasticity is correct. There is a textbook formula that turns it into a price, one line long, and this project keeps it in two files (<code>synth.py</code> and <code>impact.py</code>). It is the profit-maximising price of a single product whose demand curve never bends:",
     "problem.formula":"best price = cost &times; &beta; &divide; (1 + &beta;)",
@@ -836,19 +861,20 @@ const TRANSLATIONS = {
     "problem.guardsIntro":"The <em>portfolio</em> is a concrete list: the <strong>75 products</strong> in the three categories that cleared the gate, 23% of the <button class=\"dfn\" data-def=\"panel\" type=\"button\">panel</button>'s revenue, priced in one shot. Four rules bound what may happen to that list, and all four are constants in <code>config.py</code> rather than numbers invented for a slide. A <strong>ceiling</strong> is the most you are allowed; a <strong>floor</strong> is the least you must keep; a <strong>band</strong> is how far a single price may travel in either direction.",
 
     "gloss.kicker":"Vocabulary","gloss.h2":"Every acronym on this page, in one place",
-    "gloss.intro":"The rest of the page is readable without a statistics background, provided these are on the table first. Each one is spelled out again the first time it appears in the text.",
+    "gloss.count":"16 entries",
+    "gloss.intro":"The rest of the page is readable without a statistics background, provided these are on the table first. Every one of them is also a marked word in the text: click it and the definition opens where you are reading.",
 
     "approach.kicker":"The approach","approach.h2":"Estimate, validate, decide, price the error",
     "approach.intro":"Five stages. Each card says what goes in, what comes out, and the number that actually came out. The fifth is the one that decided this project: the pipeline is allowed to say <em>no</em>.",
-    "approach.s1h":"Estimate","approach.s1p":"<strong>In:</strong> 16,278 rows, each one product in one week. <strong>Out:</strong> three answers to the same question, <code>&minus;0.002</code>, <code>&minus;0.756</code> and <code>+58.4</code>. Three estimators, because one number never reveals the size of its own error.",
-    "approach.s2h":"Validate","approach.s2p":"<strong>In:</strong> a market the code invents, its true elasticity <code>&minus;2.103</code> written down before anything is fitted. <strong>Out:</strong> how far each estimator landed from it. On real data this check is impossible.",
-    "approach.s3h":"Decide","approach.s3p":"<strong>In:</strong> today's price of 75 products, 11 candidate prices for each. <strong>Out:</strong> one chosen price per product, obeying all four guardrails at once. A price list, not a coefficient.",
-    "approach.s4h":"Price the error","approach.s4p":"<strong>In:</strong> the biased estimate and the credible one. <strong>Out:</strong> the margin lost by trusting the wrong one, and how far the headline slides when the assumed cost changes: <code>+17.5%</code> down to <code>+2.2%</code>.",
-    "approach.s5h":"Refuse","approach.s5p":"Two gates. An <button class=\"dfn\" data-def=\"f\" type=\"button\">F</button> below 10 kills the instrument; a category whose estimate is weaker than <code>&minus;1.05</code> or blurrier than twice its own error is left unpriced. Both fire here, so <strong>77% of panel revenue gets no recommendation</strong>. That is the answer, not a hole to plug by lowering the bar.",
+    "approach.s1h":"Estimate","approach.s1p":"<strong>In:</strong> 16,278 rows, one per product and week. <strong>Out:</strong> three answers to one question: <code>&minus;0.002</code>, <code>&minus;0.756</code>, <code>+58.4</code>.",
+    "approach.s2h":"Validate","approach.s2p":"<strong>In:</strong> an invented market, true elasticity <code>&minus;2.103</code> written down first. <strong>Out:</strong> how far each estimator missed it.",
+    "approach.s3h":"Decide","approach.s3p":"<strong>In:</strong> 75 products, 11 candidate prices each. <strong>Out:</strong> one price per product, all four guardrails obeyed.",
+    "approach.s4h":"Price the error","approach.s4p":"<strong>In:</strong> the biased estimate and the credible one. <strong>Out:</strong> the margin lost by trusting the wrong one, and the range behind the headline.",
+    "approach.s5h":"Refuse","approach.s5p":"Two gates. An <button class=\"dfn\" data-def=\"f\" type=\"button\">F</button> under 10 kills the instrument; a weak or uncertain category gets no price. Both fire: <strong>77% of revenue gets no recommendation</strong>.",
 
     "arch.kicker":"Architecture","arch.h2":"How the pieces connect",
     "arch.intro":"Read it left to right, in the numbered order. Two entry points feed the same chain: a synthetic market where the right answer is known in advance, and the real Olist CSV files. Every box is a module that runs and is tested on its own, and the line under each box says what it does.",
-    "arch.cap":"The synthetic branch exists so the estimator layer can be proven wrong before it is trusted. The real branch is where the gate fires.",
+    "arch.cap":"The synthetic branch exists so an estimator can be caught being wrong, before anyone trusts it. The real branch is where the gate fires.",
     "arch.legMain":"Main chain: data goes in one end, a price list comes out the other",
     "arch.legSide":"Support: feeds the chain without being part of it",
     "arch.gateLbl":"Box 3, the gate, is where this project earns its keep",
@@ -878,7 +904,7 @@ const TRANSLATIONS = {
     "run.nb":"Both gates fire in this single run: the instrument is rejected on its first-stage F, and 17 of 20 categories are refused a recommendation.",
     "run.h3c":"3. Ask whether machine learning could replace all of it",
     "run.pc":"The fair test of &ldquo;why not just throw a model at it?&rdquo;, run on the same real panel.",
-    "run.nc":"The tree cuts forecast error by 37% and still implies an elasticity less than half the credible one. Strip its memory of past demand and it reads &minus;0.05, which is the naive regression all over again, reached by a completely different family of model.",
+    "run.nc":"The tree cuts forecast error by 37% and still implies an elasticity less than half of the credible estimate. Strip its memory of past demand and it reads &minus;0.05, which is the naive regression all over again, reached by a completely different family of model.",
     "readout.lbl":"How to read this output","readout.lines":"lines, one by one",
 
     "res.kicker":"Results","res.h2":"What the numbers say",
@@ -886,24 +912,25 @@ const TRANSLATIONS = {
     "res.h3a":"Can the estimators find an answer that is already known?",
     "res.truthBody":"This chart needs one sentence of setup, because the rest of the page leans on it. The code builds a market that does not exist, and it builds it by <em>choosing</em> the elasticity: <code>&minus;2.103</code>, written into the generator before any model sees a single row. That number is the answer key. Running the three estimators over that invented market shows how far each one lands from an answer known with certainty, which is exactly the check nobody can run on real data. That is the whole reason the invented market exists.",
     "res.c1t":"Each estimator against the answer key","res.c1s":"20 invented markets, whose true average elasticity was set to &minus;2.103. The dashed line is that answer; a bar that reaches it got the answer right",
-    "res.c1c":"Every bar that stops short of the dashed line understates how much demand reacts to price, and understating it is the dangerous direction: it makes a price rise look safer than it is. Only 2SLS reaches the line, and only 2SLS ever holds the answer inside its confidence interval.",
+    "res.c1c":"Every bar that stops short of the dashed line understates how much demand reacts to price, and understating it is the dangerous direction: it makes a price rise look safer than it really is. Only 2SLS reaches the line, and only 2SLS ever holds the answer inside its confidence interval.",
     "res.h3b":"On the real data, which categories can be priced at all?",
     "res.c2t":"Elasticity by category, real Olist panel","res.c2s":"Estimated with <button class=\"dfn\" data-def=\"fe\" type=\"button\">two-way fixed effects</button>. A category is priced only if it sits past &minus;1.05 and its estimate is at least twice its own <button class=\"dfn\" data-def=\"se\" type=\"button\">margin of error</button>",
     "res.legOk":"Credibly elastic, priced","res.legNo":"Refused",
     "res.c2c":"Seventeen categories sit short of the threshold or carry a margin of error too wide to act on. Two come out with the wrong sign entirely, claiming people buy more when the price goes up, which is a symptom of the confound rather than a finding. The pipeline prices the three on the left and declines the rest.",
+    "res.h3d":"What do the guardrails cost, and how much of the answer is an assumption?",
     "res.c3t":"What the guardrails cost","res.c3s":"Extra margin under four policies, loosest at the top. The first bar is the textbook formula applied product by product, with no rule stopping it. Taller is not automatically better here",
-    "res.c3c":"Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and a quarter of the units walk away. Arithmetically better, commercially unsignable, and that is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.",
+    "res.c3c":"Letting the formula have its way more than quadruples the gain, and it gets there by shoving every price to the top of the &plusmn;30% band: the average basket rises 30% and 28% of the units walk away. Arithmetically better, commercially unsignable, and that is the argument for the solver. The last bar is negative because its two extra demands, grow volume <em>and</em> cut the average price, cannot both be met without giving up margin. Choosing among these four rows is the actual decision.",
     "res.c4t":"The margin assumption drives the size","res.c4s":"Olist records no cost, so gross margin has to be assumed. Each bar is one assumption",
     "res.c4c":"The uplift ranges from +17.5% to +2.2% depending on a number the data cannot supply. Every bar is positive, so the direction survives any assumption; the size does not. This is the project's biggest weakness, and it is published as a table in the README rather than buried.",
     "res.h3c":"The best forecaster is the worst pricing model",
     "res.mlBody":"A fair objection to all of this is: skip the econometrics, throw a strong model at the data. So that was done. A <button class=\"dfn\" data-def=\"gbm\" type=\"button\">GBM</button> was trained to predict next week's units, judged only on weeks it had never seen. The left chart is the forecasting job, the right chart asks that same trained model what it thinks would happen if the price moved. It wins the first job and loses the second, and it loses in the dangerous direction.",
     "res.c5t":"Forecast accuracy","res.c5s":"Average size of the miss (<button class=\"dfn\" data-def=\"rmse\" type=\"button\">RMSE</button>) on weeks the model never saw. Lower is better",
     "res.c5c":"Gradient boosting wins the forecasting job decisively, cutting the error 37% against simply assuming next week repeats this one.",
-    "res.c6t":"The elasticity each model implies","res.c6s":"Measured by holding everything else fixed and moving only the price. Closer to the dashed line is better",
+    "res.c6t":"The elasticity each model implies","res.c6s":"Each bar is the elasticity that comes out when everything else is held fixed and only the price moves. Closer to the dashed line is better",
     "res.c6c":"And loses the pricing job just as decisively. Both machine-learning bars fall well short of the credible estimate, so acting on either one would under-price the risk of a rise.",
 
     "lim.kicker":"Limitations","lim.h2":"What this does not establish",
-    "lim.intro":"Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose boundary is known is worth more than one presented without it.",
+    "lim.intro":"Anyone auditing the project will press on one of these. They are stated here for the same reason they are stated in the README: a result whose limits are known is worth more than one presented without them.",
     "lim.fixLbl":"What would close it",
     "term.run":"Run","term.running":"running","term.again":"Run again",
     "term.foot":"real run on the author machine:",
@@ -989,7 +1016,7 @@ const TRANSLATIONS = {
       [
         ["persistence  RMSE 0.7155","none","the bar to beat","The dumbest possible forecast: next week equals this week. Any model that cannot beat it is not earning its keep."],
         ["gbm  RMSE 0.4489","good","a genuine win at forecasting","Gradient boosting cuts the average miss by 37%. If the job were stock planning, this is the model you would ship."],
-        ["implied elasticity: -0.2811","bad","a loss at pricing","Ask that same excellent model what happens if you move the price, and it answers &minus;0.28, roughly a third of the credible &minus;0.756. Acting on it would make a price rise look far safer than it is."],
+        ["implied elasticity: -0.2811","bad","a loss at pricing","Ask that same excellent model what happens if you move the price, and it answers &minus;0.28, roughly a third of the credible &minus;0.756. Acting on it would make a price rise look far safer than it really is."],
         ["price only: -0.0504","bad","the whole argument in one line","Remove the model's memory of past demand and the best forecaster available lands on &minus;0.05, which is the naive regression's answer reached by a completely different family of model. The bias lives in the data, not in the choice of algorithm."],
         ["with history is less biased","warn","the counter-intuitive part","The variant that remembers past demand is the <em>less</em> biased of the two, which looks backwards until you notice what a lagged sale is: a product's own recent sales carry its quality, so those lags soak up part of the very thing that was hiding behind price. Badly, but not by nothing. The features that make it forecast well are the same ones that partly clean its elasticity, and neither effect was designed."]
       ]
@@ -1018,12 +1045,12 @@ const TRANSLATIONS = {
   },
 
   "pt-BR": {
-    "nav.problem":"O problema","nav.gloss":"Glossário","nav.approach":"Abordagem",
+    "nav.problem":"O problema","nav.approach":"Abordagem",
     "nav.architecture":"Arquitetura","nav.run":"Execução","nav.results":"Resultados","nav.limits":"Limitações",
 
     "hero.kicker":"Inferência causal &middot; Otimização &middot; Aprendizado de máquina",
     "hero.title":"Otimização de Preço em Dados Reais de <span class=\"nb\">E&#8209;commerce</span>",
-    "hero.lede":"Estimar a elasticidade-preço a partir de dados observacionais de marketplace, transformar essa estimativa numa lista de preços com restrições, e deixar o pipeline <strong>se recusar a responder</strong> onde o dado não sustenta uma resposta.",
+    "hero.lede":"Estimar a elasticidade-preço a partir do histórico real de um marketplace, transformar essa estimativa numa lista de preços que respeita as regras do negócio, e deixar o pipeline <strong>se recusar a responder</strong> onde o dado não sustenta uma resposta.",
     "hero.repo":"Ver o repositório","hero.see":"Ver rodando",
     "hero.s1":"observações de produto por semana","hero.s2":"categorias precificadas, o resto recusado",
     "hero.s3":"de ganho de margem, respeitando as travas","hero.s4":"testes, reexecutados sozinhos a cada envio de código",
@@ -1043,7 +1070,7 @@ const TRANSLATIONS = {
     "problem.t1a":"Suponha que você anote o preço e a lotação de cem restaurantes. Os mais caros estão mais cheios. Subir preço enche um restaurante?",
     "problem.t1b":"Claro que não. O restaurante caro é caro <em>porque é bom</em>. Você não mediu o efeito do preço; mediu o efeito da qualidade, que estava escondida atrás do preço. A estatística tem nome para esse terceiro fator escondido: <button class=\"dfn\" data-def=\"confound\" type=\"button\">variável escondida</button>. O mesmo acontece com produto: o vendedor cobra mais caro exatamente pelos itens que as pessoas mais querem.",
     "problem.calloutLbl":"A direção do erro é sempre a mesma",
-    "problem.calloutBody":"A demanda parece <strong>menos</strong> sensível a preço do que é. Em termos de negócio: subir preço parece seguro quando não é. No dado do <button class=\"dfn\" data-def=\"olist\" type=\"button\">Olist</button>, uma regressão <button class=\"dfn\" data-def=\"ols\" type=\"button\">OLS</button> simples devolve <code>&beta; = &minus;0,002</code>. Lendo em voz alta, isso diz que subir o preço em 1% custaria 0,002% das vendas, ou seja, absolutamente nada. Nenhum mercado se comporta assim. O efeito não foi reduzido, foi apagado.",
+    "problem.calloutBody":"A demanda reage ao preço <strong>muito mais</strong> do que essa conta mostra. Em termos de negócio: subir preço parece seguro quando não é. No dado do <button class=\"dfn\" data-def=\"olist\" type=\"button\">Olist</button>, uma regressão <button class=\"dfn\" data-def=\"ols\" type=\"button\">OLS</button> simples devolve <code>&beta; = &minus;0,002</code>. Lendo em voz alta, isso diz que subir o preço em 1% custaria 0,002% das vendas, ou seja, absolutamente nada. Nenhum mercado se comporta assim. O efeito não foi reduzido, foi apagado.",
     "problem.t2h":"Armadilha 2: uma elasticidade não é um preço",
     "problem.t2a":"Suponha que a elasticidade esteja certa. Existe uma fórmula de manual que transforma ela num preço, com uma linha só, e este projeto guarda essa fórmula em dois arquivos (<code>synth.py</code> e <code>impact.py</code>). É o preço de lucro máximo de um produto sozinho, cuja curva de demanda nunca entorta:",
     "problem.formula":"melhor preço = custo &times; &beta; &divide; (1 + &beta;)",
@@ -1054,19 +1081,20 @@ const TRANSLATIONS = {
     "problem.guardsIntro":"A <em>carteira</em> é uma lista concreta: os <strong>75 produtos</strong> das três categorias que passaram no filtro, 23% da receita do <button class=\"dfn\" data-def=\"panel\" type=\"button\">painel</button>, precificados de uma vez só. Quatro regras limitam o que pode acontecer com essa lista, e as quatro são constantes do <code>config.py</code>, não números inventados para um slide. Um <strong>teto</strong> é o máximo que você tem permissão de fazer; um <strong>piso</strong> é o mínimo que você é obrigado a manter; uma <strong>faixa</strong> é o quanto um preço sozinho pode andar para cada lado.",
 
     "gloss.kicker":"Vocabulário","gloss.h2":"Toda sigla desta página, num lugar só",
-    "gloss.intro":"O resto da página é legível sem formação em estatística, desde que isto aqui esteja na mesa antes. Cada sigla também é aberta por extenso na primeira vez que aparece no texto.",
+    "gloss.count":"16 verbetes",
+    "gloss.intro":"O resto da página é legível sem formação em estatística, desde que isto aqui esteja na mesa antes. Cada um destes também é uma palavra grifada no texto: clique nela e a explicação abre onde você está lendo.",
 
     "approach.kicker":"A abordagem","approach.h2":"Estimar, validar, decidir, precificar o erro",
     "approach.intro":"Cinco estágios. Cada cartão diz o que entra, o que sai, e o número que saiu de verdade. O quinto é o que definiu este projeto: o pipeline tem permissão para dizer <em>não</em>.",
-    "approach.s1h":"Estimar","approach.s1p":"<strong>Entra:</strong> 16.278 linhas, cada uma um produto numa semana. <strong>Sai:</strong> três respostas para a mesma pergunta, <code>&minus;0,002</code>, <code>&minus;0,756</code> e <code>+58,4</code>. São três estimadores porque um número sozinho nunca revela o tamanho do próprio erro.",
-    "approach.s2h":"Validar","approach.s2p":"<strong>Entra:</strong> um mercado que o código inventa, com a elasticidade verdadeira <code>&minus;2,103</code> escrita antes de qualquer estimação. <strong>Sai:</strong> a distância de cada estimador até ela. No dado real essa conferência é impossível.",
-    "approach.s3h":"Decidir","approach.s3p":"<strong>Entra:</strong> o preço de hoje de 75 produtos, com 11 preços candidatos para cada um. <strong>Sai:</strong> um preço escolhido por produto, obedecendo as quatro travas ao mesmo tempo. Uma lista de preços, não um coeficiente.",
-    "approach.s4h":"Precificar o erro","approach.s4p":"<strong>Entra:</strong> a estimativa enviesada e a crível. <strong>Sai:</strong> a margem perdida por confiar na errada, e o quanto o número de capa escorrega quando o custo assumido muda: de <code>+17,5%</code> até <code>+2,2%</code>.",
-    "approach.s5h":"Recusar","approach.s5p":"Dois filtros. Um <button class=\"dfn\" data-def=\"f\" type=\"button\">F</button> abaixo de 10 mata o instrumento; a categoria cuja estimativa é mais fraca que <code>&minus;1,05</code> ou mais borrada que o dobro do próprio erro fica sem preço. Os dois barram aqui, então <strong>77% da receita do painel não recebe recomendação</strong>. Essa é a resposta, não um buraco a tapar baixando a régua.",
+    "approach.s1h":"Estimar","approach.s1p":"<strong>Entra:</strong> 16.278 linhas, uma por produto e semana. <strong>Sai:</strong> três respostas para uma pergunta: <code>&minus;0,002</code>, <code>&minus;0,756</code>, <code>+58,4</code>.",
+    "approach.s2h":"Validar","approach.s2p":"<strong>Entra:</strong> um mercado inventado, com a elasticidade verdadeira <code>&minus;2,103</code> escrita antes. <strong>Sai:</strong> o erro de cada estimador.",
+    "approach.s3h":"Decidir","approach.s3p":"<strong>Entra:</strong> 75 produtos, 11 preços candidatos cada. <strong>Sai:</strong> um preço por produto, com as quatro travas respeitadas.",
+    "approach.s4h":"Precificar o erro","approach.s4p":"<strong>Entra:</strong> a estimativa enviesada e a crível. <strong>Sai:</strong> a margem perdida por confiar na errada, e a faixa atrás do número de capa.",
+    "approach.s5h":"Recusar","approach.s5p":"Dois filtros. Um <button class=\"dfn\" data-def=\"f\" type=\"button\">F</button> abaixo de 10 mata o instrumento; categoria fraca ou incerta fica sem preço. Os dois barram: <strong>77% da receita fica sem recomendação</strong>.",
 
     "arch.kicker":"Arquitetura","arch.h2":"Como as peças se conectam",
     "arch.intro":"Leia da esquerda para a direita, na ordem numerada. Dois pontos de entrada alimentam a mesma cadeia: um mercado sintético onde a resposta certa é conhecida de antemão, e os arquivos CSV reais do Olist. Cada caixa é um módulo que roda e é testado sozinho, e a linha embaixo de cada caixa diz o que ela faz.",
-    "arch.cap":"O ramo sintético existe para que a camada de estimação possa ser provada errada antes de merecer confiança. O ramo real é onde o filtro barra.",
+    "arch.cap":"O ramo sintético existe para dar como pegar um estimador errando, antes de alguém confiar nele. O ramo real é onde o filtro barra.",
     "arch.legMain":"Cadeia principal: o dado entra de um lado e uma lista de preços sai do outro",
     "arch.legSide":"Apoio: alimenta a cadeia sem fazer parte dela",
     "arch.gateLbl":"A caixa 3, o filtro, é onde este projeto se justifica",
@@ -1086,7 +1114,7 @@ const TRANSLATIONS = {
     "run.kicker":"Execução","run.h2":"O que rodar de verdade imprime",
     "run.intro":"Três comandos, e o que cada um imprimiu. O texto foi capturado dessas execuções, então o botão revela a saída em vez de produzir ela: a página é um arquivo estático e não roda Python no seu navegador. O rodapé de cada bloco carrega a duração real daquele comando.",
     "run.h3a":"1. Conferir os estimadores contra uma resposta conhecida de antemão",
-    "run.pa":"Não precisa baixar nada. O código inventa este mercado, e inventa <em>escolhendo</em> a elasticidade primeiro, para que depois exista contra o que corrigir as respostas.",
+    "run.pa":"Não precisa baixar nada. O código inventa este mercado, e inventa <em>escolhendo</em> a elasticidade primeiro, para que depois exista um gabarito contra o qual conferir as respostas.",
     "run.raw":"A saída fica em inglês porque é isso que o programa imprime. A leitura linha a linha está logo abaixo.",
     "run.raw2":"A saída fica em inglês porque é isso que o programa imprime. A leitura linha a linha está logo abaixo.",
     "run.raw3":"A saída fica em inglês porque é isso que o programa imprime. A leitura linha a linha está logo abaixo.",
@@ -1096,7 +1124,7 @@ const TRANSLATIONS = {
     "run.nb":"Os dois filtros barram nesta única execução: o instrumento é rejeitado pelo F de primeiro estágio, e 17 de 20 categorias ficam sem recomendação.",
     "run.h3c":"3. Perguntar se aprendizado de máquina substituiria tudo isso",
     "run.pc":"O teste justo do &ldquo;por que não jogar um modelo nisso?&rdquo;, rodado no mesmo painel real.",
-    "run.nc":"A árvore corta 37% do erro de previsão e ainda assim implica uma elasticidade menos da metade da crível. Tire dela a memória da demanda passada e ela lê &minus;0,05, que é a regressão ingênua de novo, alcançada por uma família de modelo completamente diferente.",
+    "run.nc":"A árvore corta 37% do erro de previsão e ainda assim implica uma elasticidade que é menos da metade da estimativa crível. Tire dela a memória da demanda passada e ela lê &minus;0,05, que é a regressão ingênua de novo, alcançada por uma família de modelo completamente diferente.",
     "readout.lbl":"Como ler esta saída","readout.lines":"linhas, uma a uma",
 
     "res.kicker":"Resultados","res.h2":"O que os números dizem",
@@ -1104,24 +1132,25 @@ const TRANSLATIONS = {
     "res.h3a":"Os estimadores conseguem achar uma resposta que já é conhecida?",
     "res.truthBody":"Este gráfico precisa de uma frase de contexto, porque o resto da página se apoia nele. O código constrói um mercado que não existe, e constrói <em>escolhendo</em> a elasticidade: <code>&minus;2,103</code>, escrita no gerador antes de qualquer modelo ver uma única linha. Esse número é o gabarito. Rodar os três estimadores nesse mercado inventado mostra a que distância cada um parou de uma resposta conhecida com certeza, que é justamente a conferência que ninguém consegue fazer no dado real. É a razão inteira de o mercado inventado existir.",
     "res.c1t":"Cada estimador contra o gabarito","res.c1s":"20 mercados inventados, cuja elasticidade média verdadeira foi definida em &minus;2,103. A linha tracejada é essa resposta; a barra que chega nela acertou",
-    "res.c1c":"Toda barra que para antes da linha tracejada subestima o quanto a demanda reage a preço, e subestimar é a direção perigosa: faz um aumento parecer mais seguro do que é. Só o 2SLS alcança a linha, e só ele segura a resposta dentro do intervalo de confiança.",
+    "res.c1c":"Toda barra que para antes da linha tracejada subestima o quanto a demanda reage a preço, e subestimar é a direção perigosa: faz um aumento parecer mais seguro do que ele realmente é. Só o 2SLS alcança a linha, e só ele segura a resposta dentro do intervalo de confiança.",
     "res.h3b":"No dado real, quais categorias podem ser precificadas?",
     "res.c2t":"Elasticidade por categoria, painel real do Olist","res.c2s":"Estimada com <button class=\"dfn\" data-def=\"fe\" type=\"button\">efeitos fixos nas duas dimensões</button>. Uma categoria só é precificada se passar de &minus;1,05 e se a estimativa for pelo menos o dobro da <button class=\"dfn\" data-def=\"se\" type=\"button\">própria margem de erro</button>",
     "res.legOk":"Elástica com confiança, precificada","res.legNo":"Recusada",
     "res.c2c":"Dezessete categorias param antes do limiar ou carregam uma margem de erro larga demais para agir. Duas saem com o sinal trocado, dizendo que as pessoas compram mais quando o preço sobe, o que é sintoma da variável escondida e não uma descoberta. O pipeline precifica as três da esquerda e recusa o resto.",
+    "res.h3d":"Quanto custam as travas, e quanto da resposta é hipótese?",
     "res.c3t":"Quanto custam as travas","res.c3s":"Margem extra sob quatro políticas, da mais frouxa em cima. A primeira barra é a fórmula de manual aplicada produto a produto, sem nenhuma regra segurando. Mais alto não é automaticamente melhor aqui",
-    "res.c3c":"Deixar a fórmula fazer o que quer mais que quadruplica o ganho, e ela chega lá empurrando todo preço para o topo da faixa de &plusmn;30%: a cesta média sobe 30% e um quarto das unidades vai embora. Aritmeticamente melhor, comercialmente inassinável, e é esse o argumento para existir um solver. A última barra é negativa porque as duas exigências extras dela, crescer volume <em>e</em> baixar o preço médio, não cabem juntas sem abrir mão de margem. Escolher entre estas quatro linhas é a decisão de verdade.",
+    "res.c3c":"Deixar a fórmula fazer o que quer mais que quadruplica o ganho, e ela chega lá empurrando todo preço para o topo da faixa de &plusmn;30%: a cesta média sobe 30% e 28% das unidades vão embora. Aritmeticamente melhor, comercialmente inassinável, e é esse o argumento para existir um solver. A última barra é negativa porque as duas exigências extras dela, crescer volume <em>e</em> baixar o preço médio, não cabem juntas sem abrir mão de margem. Escolher entre estas quatro linhas é a decisão de verdade.",
     "res.c4t":"A hipótese de margem comanda o tamanho","res.c4s":"O Olist não registra custo, então a margem bruta precisa ser assumida. Cada barra é uma hipótese",
     "res.c4c":"O ganho vai de +17,5% a +2,2% conforme um número que o dado não pode fornecer. Toda barra é positiva, então a direção sobrevive a qualquer hipótese; o tamanho não. É a maior fraqueza do projeto, e está publicada em tabela no README em vez de escondida.",
     "res.h3c":"O melhor previsor é o pior modelo de precificação",
     "res.mlBody":"Uma objeção justa a tudo isto é: pule a econometria e jogue um modelo forte no dado. Então foi feito. Um <button class=\"dfn\" data-def=\"gbm\" type=\"button\">GBM</button> foi treinado para prever as unidades da semana seguinte, julgado só em semanas que ele nunca viu. O gráfico da esquerda é o trabalho de previsão; o da direita pergunta a esse mesmo modelo treinado o que ele acha que aconteceria se o preço mudasse. Ele ganha o primeiro trabalho e perde o segundo, e perde na direção perigosa.",
     "res.c5t":"Acurácia de previsão","res.c5s":"Tamanho médio do erro (<button class=\"dfn\" data-def=\"rmse\" type=\"button\">RMSE</button>) em semanas que o modelo nunca viu. Menor é melhor",
     "res.c5c":"O gradient boosting ganha o trabalho de previsão com folga, cortando 37% do erro contra simplesmente supor que a semana que vem repete esta.",
-    "res.c6t":"A elasticidade que cada modelo implica","res.c6s":"Medida mantendo tudo o mais fixo e mexendo só no preço. Quanto mais perto da linha tracejada, melhor",
+    "res.c6t":"A elasticidade que cada modelo implica","res.c6s":"Cada barra é a elasticidade que sai quando se mantém tudo fixo e mexe só no preço. Quanto mais perto da linha tracejada, melhor",
     "res.c6c":"E perde o trabalho de precificação com a mesma folga. As duas barras de aprendizado de máquina param bem antes da estimativa crível, então agir por qualquer uma delas subestimaria o risco de um aumento.",
 
     "lim.kicker":"Limitações","lim.h2":"O que isto não estabelece",
-    "lim.intro":"Quem for auditar o projeto vai apertar em um destes pontos. Estão aqui pelo mesmo motivo que estão no README: um resultado cuja fronteira é conhecida vale mais que um apresentado sem ela.",
+    "lim.intro":"Quem for auditar o projeto vai apertar em um destes pontos. Estão aqui pelo mesmo motivo que estão no README: um resultado cujos limites são conhecidos vale mais que um apresentado sem eles.",
     "lim.fixLbl":"O que resolveria",
     "term.run":"Rodar","term.running":"rodando","term.again":"Rodar de novo",
     "term.foot":"execução real na máquina do autor:",
@@ -1207,7 +1236,7 @@ const TRANSLATIONS = {
       [
         ["persistence  RMSE 0.7155","none","a régua a bater","A previsão mais burra possível: a semana que vem é igual a esta. Qualquer modelo que não bata isso não está pagando o próprio custo."],
         ["gbm  RMSE 0.4489","good","vitória real na previsão","O gradient boosting corta 37% do erro médio. Se o trabalho fosse planejar estoque, é este o modelo que você colocaria em produção."],
-        ["implied elasticity: -0.2811","bad","derrota na precificação","Pergunte a esse mesmo modelo excelente o que acontece se você mexer no preço, e ele responde &minus;0,28, cerca de um terço do &minus;0,756 crível. Agir por ele faria um aumento parecer muito mais seguro do que é."],
+        ["implied elasticity: -0.2811","bad","derrota na precificação","Pergunte a esse mesmo modelo excelente o que acontece se você mexer no preço, e ele responde &minus;0,28, cerca de um terço do &minus;0,756 crível. Agir por ele faria um aumento parecer muito mais seguro do que ele realmente é."],
         ["price only: -0.0504","bad","o argumento inteiro numa linha","Tire do modelo a memória da demanda passada e o melhor previsor disponível cai em &minus;0,05, que é a resposta da regressão ingênua alcançada por uma família de modelo completamente diferente. O viés mora no dado, não na escolha do algoritmo."],
         ["com histórico enviesa menos","warn","a parte contraintuitiva","A variante que lembra da demanda passada é a <em>menos</em> enviesada das duas, o que parece invertido até você notar o que é uma venda defasada: as vendas recentes do próprio produto carregam a qualidade dele, então essas defasagens absorvem parte exatamente daquilo que estava escondido atrás do preço. Absorvem mal, mas absorvem. Os atributos que fazem o modelo prever bem são os mesmos que limpam parcialmente a elasticidade dele, e nenhum dos dois efeitos foi projetado."]
       ]
