@@ -38,7 +38,7 @@
 }
 /* The whole page is sized in rem off this root, so one number moves every
    type size together. 110% is the reading size the owner settled on. */
-html{font-size:110%;scroll-behavior:smooth}
+html{font-size:110%;scroll-behavior:smooth;scroll-padding-top:calc(3.6rem + 1px)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{
   background:var(--surface);color:var(--ink);font-family:var(--sans);
@@ -195,7 +195,9 @@ code{
   transform:rotate(-45deg);transition:transform .15s;
 }
 .foldsec[open] > summary::before{transform:rotate(45deg)}
-.foldsec > summary:hover h2{color:var(--green-500)}
+.foldsec > summary h3{margin:0}
+.foldsec > summary:hover h2,.foldsec > summary:hover h3{color:var(--green-500)}
+.foldsec.inner{margin-top:2.8rem}
 .foldsec .cnt{font-size:1.05rem;color:var(--ink-3);white-space:nowrap}
 
 /* ---- glossary ----------------------------------------------------------- */
@@ -215,6 +217,20 @@ code{
 .term pre b{color:var(--accent);font-weight:500}
 .term pre i{color:#ffd97a;font-style:normal}
 .term-note{font-size:.92rem;color:var(--ink-3);margin-top:.7rem}
+/* Hovering a line of the reading guide blinks the exact place it is
+   talking about, up in the captured output. No padding on the marker:
+   a single pixel would break the alignment of a monospace table. */
+.term pre [data-h]{border-radius:3px}
+.term pre [data-h].lit{color:var(--midnight);animation:hlblink .85s steps(1,end) infinite}
+.term pre [data-h].lit b,.term pre [data-h].lit i{color:var(--midnight)}
+@keyframes hlblink{0%,100%{background:var(--accent)}50%{background:rgba(150,248,120,.3)}}
+/* A system set to reduce motion gets a slow breath instead of a blink:
+   still visibly alive, so the marker is never silently static, but
+   nothing that flashes. */
+@keyframes hlbreathe{0%,100%{background:var(--accent)}50%{background:rgba(150,248,120,.62)}}
+@media(prefers-reduced-motion:reduce){
+  .term pre [data-h].lit{animation:hlbreathe 2.4s ease-in-out infinite}
+}
 
 /* ---- reading guide under each terminal ----------------------------------
    The raw output never says whether a number is good news. This does. It
@@ -243,6 +259,8 @@ code{
   display:grid;grid-template-columns:minmax(9rem,15rem) 1fr;gap:1.2rem;
 }
 .readout li:first-of-type{border-top:0;padding-top:.1rem}
+.readout li.linked{cursor:pointer}
+.readout li.linked:hover .rk{background:var(--accent)}
 .readout .rk{
   font-family:var(--mono);font-size:.84rem;color:var(--midnight);
   background:var(--green-100);border-radius:5px;padding:.2rem .45rem;
@@ -408,18 +426,21 @@ svg{display:block;width:100%;height:auto;overflow:hidden}
 /* ---- approach: five steps across ---------------------------------------- */
 .steps{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);
   border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:1.8rem}
-.step{background:#fff;padding:1.4rem 1.2rem 1.6rem;display:flex;flex-direction:column}
+.step{background:#fff;padding:1.6rem 1.3rem 1.8rem;display:flex;flex-direction:column}
 .step-n{
-  width:2.1rem;height:2.1rem;border-radius:8px;background:var(--green-500);color:#fff;
-  display:grid;place-items:center;font-weight:700;font-size:.95rem;margin-bottom:.8rem;flex:none;
+  width:2.35rem;height:2.35rem;border-radius:9px;background:var(--green-500);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:1.06rem;margin-bottom:.9rem;flex:none;
 }
 .step.gate{background:var(--midnight)}
 .step.gate .step-n{background:var(--accent);color:var(--midnight)}
 .step.gate h4{color:#fff}
 .step.gate p{color:rgba(255,255,255,.82)}
-.step h4{font-size:1.34rem;font-weight:600;margin-bottom:.35rem;letter-spacing:-.015em;line-height:1.25}
-.step p{font-size:.9rem;line-height:1.55;color:var(--ink-2);margin:0;max-width:none}
-@media(max-width:1000px){.steps{grid-template-columns:repeat(2,1fr)}
+.step h4{font-size:1.44rem;font-weight:600;margin-bottom:.45rem;letter-spacing:-.015em;line-height:1.25}
+.step p{font-size:.99rem;line-height:1.58;color:var(--ink-2);margin:0;max-width:none}
+/* Five across only while a card is wide enough to hold a sentence. With the
+   larger type that floor moved up: below this it drops to two columns
+   rather than five 187px towers. */
+@media(max-width:1200px){.steps{grid-template-columns:repeat(2,1fr)}
   .step.gate{grid-column:1 / -1}}
 @media(max-width:560px){.steps{grid-template-columns:1fr}
   .step.gate{grid-column:auto}}
@@ -516,7 +537,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <details class="foldsec">
       <summary>
         <h2 data-i18n="gloss.h2">Every acronym on this page, in one place</h2>
-        <span class="cnt" data-i18n="gloss.count">16 entries</span>
+        <span class="cnt" id="glossCount"></span>
       </summary>
       <p class="intro" data-i18n="gloss.intro">The rest of the page is readable without a statistics background, provided these are on the table first. Every one of them is also a marked word in the text: click it and the definition opens where you are reading.</p>
       <div class="gloss" id="glossBody"></div>
@@ -583,13 +604,18 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       <p data-i18n-html="arch.gateBody">Every other box computes something. This one decides <strong>whether the pipeline is allowed to answer at all</strong>, and it asks two questions in order. First: is the instrument strong enough to be used, meaning is its <button class="dfn" data-def="f" type="button">first-stage F</button> at least 10? Here it is 0.16, so 2SLS is thrown away and fixed effects carry the estimate. Second, per category: is this elasticity past <code>&minus;1.05</code> and at least twice its own <button class="dfn" data-def="se" type="button">margin of error</button>? Three categories out of twenty say yes. The other seventeen leave with no price, which is why the box is drawn as a wall rather than a step.</p>
     </div>
 
-    <h3 data-i18n="arch.filesH">What each file does</h3>
-    <div class="tbl-wrap">
-      <table>
-        <thead><tr><th data-i18n="arch.thFile">File</th><th data-i18n="arch.thResp">Responsibility</th><th data-i18n="arch.thWhy">Why it exists</th></tr></thead>
-        <tbody id="filesBody"></tbody>
-      </table>
-    </div>
+    <details class="foldsec inner">
+      <summary>
+        <h3 data-i18n="arch.filesH">What each file does</h3>
+        <span class="cnt" id="filesCount"></span>
+      </summary>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th data-i18n="arch.thFile">File</th><th data-i18n="arch.thResp">Responsibility</th><th data-i18n="arch.thWhy">Why it exists</th></tr></thead>
+          <tbody id="filesBody"></tbody>
+        </table>
+      </div>
+    </details>
   </div>
 </section>
 
@@ -613,13 +639,13 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
       <pre hidden>
 Estimator recovery on synthetic data -- ENDOGENOUS pricing, 20 markets
 
-        method  true_beta  mean_estimate   bias  rel_bias_pct   rmse  ci_coverage
-    Pooled OLS     -2.103         -1.590  0.513        24.479  0.518        0.000
-    Two-way FE     -2.103         -1.769  0.334        15.973  0.334        0.000
-<b>2SLS (cost IV)     -2.103         -2.103  0.000         0.008  0.009        1.000</b>
+        method  <span data-h="t1r0">true_beta</span>  mean_estimate   bias  <span data-h="t1r5">rel_bias_pct</span>   rmse  <span data-h="t1r4">ci_coverage</span>
+<span data-h="t1r1">    Pooled OLS     <span data-h="t1r0">-2.103</span>         -1.590  0.513        24.479  0.518        <span data-h="t1r4">0.000</span></span>
+<span data-h="t1r2">    Two-way FE     <span data-h="t1r0">-2.103</span>         -1.769  0.334        15.973  0.334        <span data-h="t1r4">0.000</span></span>
+<b><span data-h="t1r3">2SLS (cost IV)     <span data-h="t1r0">-2.103</span>         -2.103  0.000         0.008  0.009        <span data-h="t1r4">1.000</span></span></b>
 
-rel_bias_pct > 0 means the estimate is closer to zero than the truth,
-i.e. demand looks less price-sensitive than it really is.</pre>
+<span data-h="t1r5">rel_bias_pct > 0 means the estimate is closer to zero than the truth,
+i.e. demand looks less price-sensitive than it really is.</span></pre>
       <div class="term-foot" hidden></div>
     </div>
     <p class="term-note" data-i18n="run.raw">The output stays in English because that is what the program prints. The line-by-line reading is right below.</p>
@@ -637,22 +663,22 @@ i.e. demand looks less price-sensitive than it really is.</pre>
       <div class="term-prog" hidden><i></i></div>
       <div class="term-idle"><span class="caret"></span></div>
       <pre hidden>
-Panel: 16,278 rows | 844 products | 88 weeks
+<span data-h="t2r0">Panel: 16,278 rows | 844 products | 88 weeks</span>
 
 Portfolio-wide elasticity
-  Pooled OLS             beta = -0.002 (SE 0.018)  95% CI [-0.036, +0.033]
-  Two-way FE             beta = -0.756 (SE 0.092)  95% CI [-0.936, -0.576]
-  2SLS (cost IV)         beta = +58.440 (SE 147.697)  95% CI [-231.046, +347.926]
+<span data-h="t2r1">  Pooled OLS             beta = -0.002 (SE 0.018)  95% CI [-0.036, +0.033]</span>
+<span data-h="t2r2">  Two-way FE             beta = -0.756 (SE 0.092)  95% CI [-0.936, -0.576]</span>
+<span data-h="t2r3">  2SLS (cost IV)         beta = +58.440 (SE 147.697)  95% CI [-231.046, +347.926]</span>
 
 Estimator for the decision: estimate_twoway_fe
-  <i>instrument rejected: first-stage F = 0.16, below 10. 2SLS would be biased
-  toward OLS with no interval coverage</i>
+  <i><span data-h="t2r4">instrument rejected: first-stage F = 0.16, below 10. 2SLS would be biased
+  toward OLS with no interval coverage</span></i>
 
 Elasticity by category
                 category  elasticity  std_error  t_stat  n_obs  credible
-<b>              cool_stuff      -1.443      0.362  -3.983    940      True</b>
-<b>           watches_gifts      -1.224      0.169  -7.246   1256      True</b>
-<b>               perfumery      -1.195      0.452  -2.643    564      True</b>
+<b><span data-h="t2r5">              cool_stuff      -1.443      0.362  -3.983    940      True</span></b>
+<b><span data-h="t2r5">           watches_gifts      -1.224      0.169  -7.246   1256      True</span></b>
+<b><span data-h="t2r5">               perfumery      -1.195      0.452  -2.643    564      True</span></b>
         office_furniture      -1.079      0.683  -1.579    401     False
          furniture_decor      -1.077      0.790  -1.363    943     False
      luggage_accessories      -0.994      0.319  -3.113    201     False
@@ -665,12 +691,12 @@ Elasticity by category
               stationery       0.431      0.539   0.799    303     False
                      ...
 
-  <i>3 of 20 categories are credibly elastic (beta &lt; -1.05, |t| &gt; 2.0)</i>
+  <i><span data-h="t2r5">3 of 20 categories are credibly elastic (beta &lt; -1.05, |t| &gt; 2.0)</span></i>
 
 Optimiser on 75 products across 3 categories (23% of panel revenue)
-  guardrails on   [Optimal] margin 6,957 -> 7,483 <b>(+7.56%)</b>  |  revenue -1.04%  |  avg price +5.00%
-  guardrails off  [Unconstrained] margin 6,957 -> 9,277 (+33.34%)  |  revenue -6.66%  |  avg price +30.00%
-  <i>guardrails cost 25.79 pp of margin uplift</i></pre>
+<span data-h="t2r6">  guardrails on   [Optimal] margin 6,957 -> 7,483 <b>(+7.56%)</b>  |  revenue -1.04%  |  avg price +5.00%</span>
+<span data-h="t2r7">  guardrails off  [Unconstrained] margin 6,957 -> 9,277 (+33.34%)  |  revenue -6.66%  |  avg price +30.00%</span>
+  <i><span data-h="t2r8">guardrails cost 25.79 pp of margin uplift</span></i></pre>
       <div class="term-foot" hidden></div>
     </div>
     <p class="term-note" data-i18n="run.raw2">The output stays in English because that is what the program prints. The line-by-line reading is right below.</p>
@@ -692,17 +718,17 @@ Panel: 16278 rows, 844 units, 88 weeks
 
 --- with history ---
 model              RMSE      MAE
-persistence      0.7155   0.4880
+<span data-h="t3r0">persistence      0.7155   0.4880</span>
 ridge            0.5739   0.4627
-<b>gbm              0.4489   0.3360</b>
-<i>implied elasticity from the GBM: -0.2811</i>
+<b><span data-h="t3r1">gbm              0.4489   0.3360</span></b>
+<i><span data-h="t3r2 t3r4">implied elasticity from the GBM: -0.2811</span></i>
 
---- price only ---
+<span data-h="t3r3">--- price only ---</span>
 model              RMSE      MAE
 persistence      0.6753   0.5538
 ridge            0.6726   0.5601
 gbm              0.4670   0.3477
-<i>implied elasticity from the GBM: -0.0504</i></pre>
+<i><span data-h="t3r3 t3r4">implied elasticity from the GBM: -0.0504</span></i></pre>
       <div class="term-foot" hidden></div>
     </div>
     <p class="term-note" data-i18n="run.raw3">The output stays in English because that is what the program prints. The line-by-line reading is right below.</p>
@@ -861,7 +887,7 @@ const TRANSLATIONS = {
     "problem.guardsIntro":"The <em>portfolio</em> is a concrete list: the <strong>75 products</strong> in the three categories that cleared the gate, 23% of the <button class=\"dfn\" data-def=\"panel\" type=\"button\">panel</button>'s revenue, priced in one shot. Four rules bound what may happen to that list, and all four are constants in <code>config.py</code> rather than numbers invented for a slide. A <strong>ceiling</strong> is the most you are allowed; a <strong>floor</strong> is the least you must keep; a <strong>band</strong> is how far a single price may travel in either direction.",
 
     "gloss.kicker":"Vocabulary","gloss.h2":"Every acronym on this page, in one place",
-    "gloss.count":"16 entries",
+    "gloss.unit":"entries",
     "gloss.intro":"The rest of the page is readable without a statistics background, provided these are on the table first. Every one of them is also a marked word in the text: click it and the definition opens where you are reading.",
 
     "approach.kicker":"The approach","approach.h2":"Estimate, validate, decide, price the error",
@@ -888,7 +914,7 @@ const TRANSLATIONS = {
       "support: forecasts demand, reads the review text",
       "support: sizes the gain and how fragile it is"
     ],
-    "arch.filesH":"What each file does","arch.thFile":"File","arch.thResp":"Responsibility","arch.thWhy":"Why it exists",
+    "arch.filesUnit":"files","arch.filesH":"What each file does","arch.thFile":"File","arch.thResp":"Responsibility","arch.thWhy":"Why it exists",
     "arch.note":"the gate is where 17 of 20 categories stop",
 
     "run.kicker":"Execution","run.h2":"What running it actually prints",
@@ -1081,7 +1107,7 @@ const TRANSLATIONS = {
     "problem.guardsIntro":"A <em>carteira</em> é uma lista concreta: os <strong>75 produtos</strong> das três categorias que passaram no filtro, 23% da receita do <button class=\"dfn\" data-def=\"panel\" type=\"button\">painel</button>, precificados de uma vez só. Quatro regras limitam o que pode acontecer com essa lista, e as quatro são constantes do <code>config.py</code>, não números inventados para um slide. Um <strong>teto</strong> é o máximo que você tem permissão de fazer; um <strong>piso</strong> é o mínimo que você é obrigado a manter; uma <strong>faixa</strong> é o quanto um preço sozinho pode andar para cada lado.",
 
     "gloss.kicker":"Vocabulário","gloss.h2":"Toda sigla desta página, num lugar só",
-    "gloss.count":"16 verbetes",
+    "gloss.unit":"verbetes",
     "gloss.intro":"O resto da página é legível sem formação em estatística, desde que isto aqui esteja na mesa antes. Cada um destes também é uma palavra grifada no texto: clique nela e a explicação abre onde você está lendo.",
 
     "approach.kicker":"A abordagem","approach.h2":"Estimar, validar, decidir, precificar o erro",
@@ -1108,7 +1134,7 @@ const TRANSLATIONS = {
       "apoio: prevê a demanda e lê o texto das avaliações",
       "apoio: mede o ganho e o quanto ele é frágil"
     ],
-    "arch.filesH":"O que cada arquivo faz","arch.thFile":"Arquivo","arch.thResp":"Responsabilidade","arch.thWhy":"Por que existe",
+    "arch.filesUnit":"arquivos","arch.filesH":"O que cada arquivo faz","arch.thFile":"Arquivo","arch.thResp":"Responsabilidade","arch.thWhy":"Por que existe",
     "arch.note":"o filtro é onde 17 de 20 categorias param",
 
     "run.kicker":"Execução","run.h2":"O que rodar de verdade imprime",
@@ -1299,6 +1325,10 @@ function renderRows() {
   document.getElementById("glossBody").innerHTML = Object.values(t("defs"))
     .map(([term, full, body]) => `<div class="gl"><h4>${term}</h4>` +
       `<div class="full">${full}</div><p>${body}</p></div>`).join("");
+  document.getElementById("glossCount").textContent =
+    Object.keys(t("defs")).length + " " + t("gloss.unit");
+  document.getElementById("filesCount").textContent =
+    t("files").length + " " + t("arch.filesUnit");
   document.getElementById("guardsBody").innerHTML = t("guards")
     .map(([kind, tag, name, value, src, forbids, how]) =>
       `<div class="guard${kind === "opt" ? " opt" : ""}"><span class="tag">${tag}</span>` +
@@ -1316,10 +1346,31 @@ function renderReadouts() {
     const wasOpen = mount.open;
     mount.innerHTML = `<summary>${t("readout.lbl")}` +
       `<span class="cnt">${rows.length} ${t("readout.lines")}</span></summary><ul>` + rows.map(
-      ([k, v, badge, txt]) =>
-        `<li><span class="rk">${k}</span><span><em class="verdict v-${v}">${badge}</em>${txt}</span></li>`
+      ([k, v, badge, txt], i) =>
+        `<li data-h-key="t${Number(mount.dataset.readout) + 1}r${i}">` +
+        `<span class="rk">${k}</span>` +
+        `<span><em class="verdict v-${v}">${badge}</em>${txt}</span></li>`
     ).join("") + "</ul>";
     mount.open = wasOpen;
+  });
+  wireReadoutHighlights();
+}
+
+/* Every line of a reading guide names a place in the captured output, and
+   finding that place by eye in a wall of monospace is the hard part. Hovering
+   the line blinks it up there instead. The rows are rebuilt on each language
+   switch, so the listeners go on fresh nodes every time. */
+function wireReadoutHighlights() {
+  document.querySelectorAll("[data-h-key]").forEach(li => {
+    const marks = document.querySelectorAll(`[data-h~="${li.dataset.hKey}"]`);
+    if (!marks.length) return;
+    li.classList.add("linked");
+    li.addEventListener("mouseenter", () => {
+      // Nothing to point at until the block has been revealed.
+      if (marks[0].closest("pre").hidden) return;
+      marks.forEach(n => n.classList.add("lit"));
+    });
+    li.addEventListener("mouseleave", () => marks.forEach(n => n.classList.remove("lit")));
   });
 }
 
