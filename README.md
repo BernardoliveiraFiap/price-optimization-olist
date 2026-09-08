@@ -136,9 +136,13 @@ than reporting a weak-IV estimate as causal.
 Pooled OLS returning -0.002 is its own finding: on this data, ignoring
 confounding does not merely bias the elasticity, it erases it.
 
-**Most categories cannot be priced.** Only 3 of 20 clear the bar of being
-credibly below -1 (`cool_stuff` -1.44, `watches_gifts` -1.22, `perfumery`
--1.20). The rest are inelastic as measured, where the constant-elasticity
+**Most categories cannot be priced.** Only 3 of 20 clear the gate, which
+requires a point estimate past -1.05 *and* an estimate at least twice its own
+standard error (`cool_stuff` -1.44, `watches_gifts` -1.22, `perfumery` -1.20).
+That second test is against zero, not against -1: the 95% intervals of all
+three still cross -1, and requiring the whole interval to clear -1 would reject
+every category in the panel. The gate is a declared trade-off, not a claim of
+statistical elasticity. The rest are inelastic as measured, where the constant-elasticity
 margin has no interior optimum and a "recommendation" would just be the edge of
 whatever band it was given. Two categories show positive point estimates, both
 with |t| < 1 -- noise, not Giffen goods.
@@ -481,9 +485,12 @@ so the table in this README is re-proved rather than pasted.
   survives when that assumption fails.
 - **Olist records no costs.** The margin-rate assumption sets the size of the
   uplift, as the sensitivity table shows. Only the direction is robust to it.
-- **77% of the panel revenue is not priced at all**, because its elasticity is
-  not credibly below -1. That is a real answer, not a gap to be filled by
-  lowering the bar.
+- **77% of the panel revenue is not priced at all**, because its estimated
+  elasticity does not clear -1.05 with an estimate twice its standard error.
+  That is a real answer, not a gap to be filled by lowering the bar. The
+  converse is also worth stating: the gate does not certify that the three
+  priced categories are elastic beyond doubt, since their intervals still
+  cross -1.
 - **Cross-price effects are ignored.** Products are treated as independent, so
   cannibalization between substitutes is not modelled.
 - **Constant elasticity is a strong functional form.** It cannot represent
