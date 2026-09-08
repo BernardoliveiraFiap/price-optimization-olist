@@ -487,6 +487,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <div class="links">
       <a class="btn btn-primary" href="https://github.com/BernardoliveiraFiap/price-optimization-olist" data-i18n="hero.repo">View the repository</a>
       <a class="btn btn-ghost" href="#run" data-i18n="hero.see">See it run</a>
+      <a class="btn btn-ghost" href="https://colab.research.google.com/github/BernardoliveiraFiap/price-optimization-olist/blob/main/notebooks/roteiro-por-niveis.ipynb" target="_blank" rel="noopener" data-i18n="hero.colab">Run it in Colab</a>
     </div>
     <div class="stats">
       <div class="stat"><b>16,278</b><span data-i18n="hero.s1">product-week observations</span></div>
@@ -506,7 +507,7 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
 
     <div class="callout wide">
       <div class="lbl" data-i18n="problem.betaLbl">One number decides everything on this page</div>
-      <p data-i18n-html="problem.betaBody"><button class="dfn" data-def="beta" type="button">Elasticity</button>, written <code>&beta;</code>, answers a single question: <strong>if I raise the price by 1%, how much do sales fall?</strong> A &beta; of &minus;1.4 means sales fall 1.4%. It comes out negative because price and quantity move in opposite directions, so a positive &beta; would be claiming people buy more when you charge more. The line that matters is <strong>&minus;1</strong>: past it (more negative) a price rise loses more volume than it gains in price and revenue falls, while short of it a price rise still grows revenue. Every estimate on this page is one more attempt at that same number.</p>
+      <p data-i18n-html="problem.betaBody"><button class="dfn" data-def="beta" type="button">Elasticity</button>, written <code>&beta;</code>, answers a single question: <strong>if I raise the price by 1%, how much do sales fall?</strong> A &beta; of &minus;1.4 means sales fall 1.4%, and it runs both ways: cut the price 1% and sales rise 1.4%. It is a <em>rate</em>, not a quantity &mdash; like kilometres per litre, on its own it predicts nothing until you say how far the price moved. It comes out negative because price and quantity move in opposite directions, so a positive &beta; would be claiming people buy more when you charge more. The line that matters is <strong>&minus;1</strong>: past it (more negative) a price rise loses more volume than it gains in price and revenue falls, while short of it a price rise still grows revenue. Every estimate on this page is one more attempt at that same number.</p>
     </div>
 
     <div class="traps">
@@ -633,6 +634,8 @@ footer .frow{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wra
     <div class="sec-kicker" data-i18n="run.kicker">Execution</div>
     <h2 data-i18n="run.h2">What running it actually prints</h2>
     <p class="intro" data-i18n-html="run.intro">Three commands, and what each one printed. The text was captured from those runs, so the button reveals output rather than producing it: the page is a static file and cannot run Python in your browser. Each block's footer carries that command's real duration.</p>
+
+    <p class="term-note" data-i18n-html="run.colab">Each command below is also a level of a guided notebook that runs on a free Colab machine. <a href="https://colab.research.google.com/github/BernardoliveiraFiap/price-optimization-olist/blob/main/notebooks/roteiro-por-niveis.ipynb" target="_blank" rel="noopener">Open the notebook</a> to execute this repository yourself, with the questions each output should raise and the answers checked against these same numbers. It is written in Portuguese.</p>
 
     <h3 data-i18n="run.h3a">1. Check the estimators against an answer that is known in advance</h3>
     <p class="muted" data-i18n-html="run.pa">Nothing to download. The code invents this market, and it invents it by <em>choosing</em> the elasticity first, so afterwards there is something to mark the answers against.</p>
@@ -865,7 +868,7 @@ const TRANSLATIONS = {
     "hero.kicker":"Causal inference &middot; Optimization &middot; Machine learning",
     "hero.title":"Price Optimization on Brazilian <span class=\"nb\">E&#8209;Commerce</span> Data",
     "hero.lede":"Estimating price elasticity from a real marketplace's own history, turning that estimate into a price list that obeys the business rules, and letting the pipeline <strong>refuse to answer</strong> where the data cannot support one.",
-    "hero.repo":"View the repository","hero.see":"See it run",
+    "hero.repo":"View the repository","hero.see":"See it run","hero.colab":"Run it in Colab",
     "hero.s1":"product-week observations","hero.s2":"categories priced, the rest refused",
     "hero.s3":"margin uplift, guardrails respected","hero.s4":"tests, re-run automatically on every push",
     "heroWords":[
@@ -879,7 +882,7 @@ const TRANSLATIONS = {
     "problem.kicker":"The problem","problem.h2":"Price is not assigned at random",
     "problem.intro":"Two traps sit between a dataset and a price list. The first is statistical, the second is about decisions. Most analyses fall into both.",
     "problem.betaLbl":"One number decides everything on this page",
-    "problem.betaBody":"<button class=\"dfn\" data-def=\"beta\" type=\"button\">Elasticity</button>, written <code>&beta;</code>, answers a single question: <strong>if I raise the price by 1%, how much do sales fall?</strong> A &beta; of &minus;1.4 means sales fall 1.4%. It comes out negative because price and quantity move in opposite directions, so a positive &beta; would be claiming people buy more when you charge more. The line that matters is <strong>&minus;1</strong>: past it (more negative) a price rise loses more volume than it gains in price and revenue falls, while short of it a price rise still grows revenue. Every estimate on this page is one more attempt at that same number.",
+    "problem.betaBody":"<button class=\"dfn\" data-def=\"beta\" type=\"button\">Elasticity</button>, written <code>&beta;</code>, answers a single question: <strong>if I raise the price by 1%, how much do sales fall?</strong> A &beta; of &minus;1.4 means sales fall 1.4%, and it runs both ways: cut the price 1% and sales rise 1.4%. It is a <em>rate</em>, not a quantity &mdash; like kilometres per litre, on its own it predicts nothing until you say how far the price moved. It comes out negative because price and quantity move in opposite directions, so a positive &beta; would be claiming people buy more when you charge more. The line that matters is <strong>&minus;1</strong>: past it (more negative) a price rise loses more volume than it gains in price and revenue falls, while short of it a price rise still grows revenue. Every estimate on this page is one more attempt at that same number.",
     "problem.t1h":"Trap 1: the confound",
     "problem.t1a":"Suppose you record the price and the occupancy of a hundred restaurants. The expensive ones are fuller. Does raising prices fill a restaurant?",
     "problem.t1b":"Of course not. The expensive restaurant is expensive <em>because it is good</em>. You did not measure the effect of price; you measured the effect of quality, which was hiding behind price. Statistics has a name for that hidden third thing: a <button class=\"dfn\" data-def=\"confound\" type=\"button\">confound</button>. The same thing happens to products: a seller charges more for exactly the items people want most.",
@@ -926,6 +929,7 @@ const TRANSLATIONS = {
     "arch.note":"the gate is where 17 of 20 categories stop",
 
     "run.kicker":"Execution","run.h2":"What running it actually prints",
+    "run.colab":"Each command below is also a level of a guided notebook that runs on a free Colab machine. <a href=\"https://colab.research.google.com/github/BernardoliveiraFiap/price-optimization-olist/blob/main/notebooks/roteiro-por-niveis.ipynb\" target=\"_blank\" rel=\"noopener\">Open the notebook</a> to execute this repository yourself, with the questions each output should raise and the answers checked against these same numbers. It is written in Portuguese.",
     "run.intro":"Three commands, and what each one printed. The text was captured from those runs, so the button reveals output rather than producing it: the page is a static file and cannot run Python in your browser. Each block's footer carries that command's real duration.",
     "run.h3a":"1. Check the estimators against an answer that is known in advance",
     "run.pa":"Nothing to download. The code invents this market, and it invents it by <em>choosing</em> the elasticity first, so afterwards there is something to mark the answers against.",
@@ -1029,8 +1033,8 @@ const TRANSLATIONS = {
 
     "readouts":[
       [
-        ["true_beta  -2.103","none","the answer key","The elasticity written into the simulated market before any model ran. On real data this column cannot exist, which is exactly why this experiment is here."],
-        ["Pooled OLS  -1.590","bad","bad","The plain regression misses the truth by 24%, and it misses toward zero: it makes demand look calmer about price than it really is. That is the dangerous direction of error."],
+        ["true_beta  -2.103","none","the answer key","The elasticity written into the simulated market before any model ran: for every 1% the price rises, quantity sold falls 2.103%. Each of the 20 markets draws its own truth between &minus;2.8 and &minus;1.3, so this figure is their average &mdash; a single market shows a different one. On real data the column cannot exist at all, which is exactly why this experiment is here."],
+        ["Pooled OLS  -1.590","bad","bad","The plain regression misses the truth by 24%, and it misses toward zero: it makes demand look calmer about price than it really is. That is the dangerous direction of error. Fed to the optimal-price formula, the gap is money: on a product costing R$&nbsp;26.22 the true elasticity prices at R$&nbsp;50.00 and this one at R$&nbsp;70.66, 41% too high."],
         ["Two-way FE  -1.769","warn","better, still off","Giving each product and each week its own baseline recovers most of the gap, but 16% of the bias survives. Useful, not clean."],
         ["2SLS  -2.103","good","correct","Lands on the planted truth with 0.008% of error. When the instrument is strong, this design works, and that is the claim being proven here."],
         ["ci_coverage  1.000 / 0.000","good","the sharpest line here","Across 20 simulated markets, the 95% interval of 2SLS contained the truth every single time, and the intervals of the other two contained it never. An estimator that is always confidently wrong is more dangerous than one that admits uncertainty."],
@@ -1045,7 +1049,7 @@ const TRANSLATIONS = {
         ["credible = True on 3 of 20","warn","an honest refusal","A category is priced only if it sits past &minus;1.05 and its estimate is at least twice its own <button class=\"dfn\" data-def=\"se\" type=\"button\">margin of error</button>. Seventeen fail. Reporting a price for those would be inventing precision."],
         ["guardrails on  (+7.56%)","good","the headline result","Margin rises 7.56% while revenue moves only &minus;1.04%, inside its &minus;2% floor, and the average price lands exactly on its +5% ceiling. Landing exactly on the ceiling means that rule is what stopped it, not the model."],
         ["guardrails off  (+33.34%)","warn","better on paper, unacceptable in practice","It gets there by pushing every price to the top of the &plusmn;30% band, giving up 28% of volume and 6.66% of revenue, which breaks the floor a real team would have set."],
-        ["25.79 pp","none","the price of discipline","The gap between the two policies. Not a defect: it is what the ability to say &ldquo;we will not do that&rdquo; costs, and knowing the figure is what makes the trade-off a decision instead of an accident."]
+        ["25.79 pp","none","the price of discipline","Percentage points, not percent: the plain subtraction of 33.34 minus 7.56. It is the gap between the two policies. Not a defect: it is what the ability to say &ldquo;we will not do that&rdquo; costs, and knowing the figure is what makes the trade-off a decision instead of an accident."]
       ],
       [
         ["persistence  RMSE 0.7155","none","the bar to beat","The dumbest possible forecast: next week equals this week. A model that cannot beat it is not worth running."],
@@ -1085,7 +1089,7 @@ const TRANSLATIONS = {
     "hero.kicker":"Inferência causal &middot; Otimização &middot; Aprendizado de máquina",
     "hero.title":"Otimização de Preço em Dados Reais de <span class=\"nb\">E&#8209;commerce</span>",
     "hero.lede":"Estimar a elasticidade-preço a partir do histórico real de um marketplace, transformar essa estimativa numa lista de preços que respeita as regras do negócio, e deixar o pipeline <strong>se recusar a responder</strong> onde o dado não sustenta uma resposta.",
-    "hero.repo":"Ver o repositório","hero.see":"Ver rodando",
+    "hero.repo":"Ver o repositório","hero.see":"Ver rodando","hero.colab":"Rodar no Colab",
     "hero.s1":"observações de produto por semana","hero.s2":"categorias precificadas, o resto recusado",
     "hero.s3":"de ganho de margem, respeitando as travas","hero.s4":"testes, reexecutados sozinhos a cada envio de código",
     "heroWords":[
@@ -1099,7 +1103,7 @@ const TRANSLATIONS = {
     "problem.kicker":"O problema","problem.h2":"Preço não é sorteado",
     "problem.intro":"Duas armadilhas separam um conjunto de dados de uma lista de preços. A primeira é estatística, a segunda é de decisão. A maioria das análises cai nas duas.",
     "problem.betaLbl":"Um número decide tudo nesta página",
-    "problem.betaBody":"A <button class=\"dfn\" data-def=\"beta\" type=\"button\">elasticidade</button>, escrita <code>&beta;</code>, responde a uma pergunta só: <strong>se eu subir o preço em 1%, quanto as vendas caem?</strong> Um &beta; de &minus;1,4 quer dizer que as vendas caem 1,4%. Ela sai negativa porque preço e quantidade andam em sentidos opostos, então um &beta; positivo estaria dizendo que as pessoas compram mais quanto mais caro fica. A fronteira que importa é <strong>&minus;1</strong>: passando dela (mais negativo) subir preço perde mais volume do que ganha em preço e a receita cai; antes dela, subir preço ainda aumenta a receita. Toda estimativa desta página é mais uma tentativa de acertar esse mesmo número.",
+    "problem.betaBody":"A <button class=\"dfn\" data-def=\"beta\" type=\"button\">elasticidade</button>, escrita <code>&beta;</code>, responde a uma pergunta só: <strong>se eu subir o preço em 1%, quanto as vendas caem?</strong> Um &beta; de &minus;1,4 quer dizer que as vendas caem 1,4%, e vale nos dois sentidos: baixe o preço 1% e as vendas sobem 1,4%. Ela é uma <em>taxa</em>, não um valor de venda &mdash; como km por litro, sozinha não prevê nada até você dizer quanto mexeu no preço. Ela sai negativa porque preço e quantidade andam em sentidos opostos, então um &beta; positivo estaria dizendo que as pessoas compram mais quanto mais caro fica. A fronteira que importa é <strong>&minus;1</strong>: passando dela (mais negativo) subir preço perde mais volume do que ganha em preço e a receita cai; antes dela, subir preço ainda aumenta a receita. Toda estimativa desta página é mais uma tentativa de acertar esse mesmo número.",
     "problem.t1h":"Armadilha 1: a variável escondida",
     "problem.t1a":"Suponha que você anote o preço e a lotação de cem restaurantes. Os mais caros estão mais cheios. Subir preço enche um restaurante?",
     "problem.t1b":"Claro que não. O restaurante caro é caro <em>porque é bom</em>. Você não mediu o efeito do preço; mediu o efeito da qualidade, que estava escondida atrás do preço. A estatística tem nome para esse terceiro fator escondido: <button class=\"dfn\" data-def=\"confound\" type=\"button\">variável escondida</button>. O mesmo acontece com produto: o vendedor cobra mais caro exatamente pelos itens que as pessoas mais querem.",
@@ -1146,6 +1150,7 @@ const TRANSLATIONS = {
     "arch.note":"o filtro é onde 17 de 20 categorias param",
 
     "run.kicker":"Execução","run.h2":"O que rodar de verdade imprime",
+    "run.colab":"Cada comando abaixo também é um nível de um roteiro que roda numa máquina gratuita do Colab. <a href=\"https://colab.research.google.com/github/BernardoliveiraFiap/price-optimization-olist/blob/main/notebooks/roteiro-por-niveis.ipynb\" target=\"_blank\" rel=\"noopener\">Abra o roteiro</a> para executar este repositório você mesmo, com as perguntas que cada saída deveria levantar e as respostas conferidas contra estes mesmos números.",
     "run.intro":"Três comandos, e o que cada um imprimiu. O texto foi capturado dessas execuções, então o botão revela a saída em vez de produzir ela: a página é um arquivo estático e não roda Python no seu navegador. O rodapé de cada bloco carrega a duração real daquele comando.",
     "run.h3a":"1. Conferir os estimadores contra uma resposta conhecida de antemão",
     "run.pa":"Não precisa baixar nada. O código inventa este mercado, e inventa <em>escolhendo</em> a elasticidade primeiro, para que depois exista um gabarito contra o qual conferir as respostas.",
@@ -1249,8 +1254,8 @@ const TRANSLATIONS = {
 
     "readouts":[
       [
-        ["true_beta  -2.103","none","o gabarito","A elasticidade escrita dentro do mercado simulado antes de qualquer modelo rodar. No dado real essa coluna não pode existir, e é exatamente por isso que este experimento está aqui."],
-        ["Pooled OLS  -1.590","bad","ruim","A regressão simples erra a verdade em 24%, e erra na direção do zero: faz a demanda parecer mais indiferente a preço do que ela é. Essa é a direção perigosa do erro."],
+        ["true_beta  -2.103","none","o gabarito","A elasticidade escrita dentro do mercado simulado antes de qualquer modelo rodar: para cada 1% que o preço sobe, a quantidade vendida cai 2,103%. Cada um dos 20 mercados sorteia o próprio gabarito entre &minus;2,8 e &minus;1,3, então este número é a média deles &mdash; um mercado sozinho mostra outro. No dado real a coluna não pode existir, e é exatamente por isso que este experimento está aqui."],
+        ["Pooled OLS  -1.590","bad","ruim","A regressão simples erra a verdade em 24%, e erra na direção do zero: faz a demanda parecer mais indiferente a preço do que ela é. Essa é a direção perigosa do erro. Jogado na fórmula do preço ótimo, esse buraco vira dinheiro: num produto de custo R$&nbsp;26,22 a elasticidade verdadeira manda cobrar R$&nbsp;50,00 e esta aqui manda cobrar R$&nbsp;70,66, 41% a mais do que devia."],
         ["Two-way FE  -1.769","warn","melhor, ainda torto","Dar a cada produto e a cada semana a própria linha de base recupera boa parte da distância, mas 16% do viés sobrevive. Útil, não limpo."],
         ["2SLS  -2.103","good","certo","Acerta a verdade plantada com 0,008% de erro. Quando o instrumento é forte, este desenho funciona, e é essa a alegação sendo provada aqui."],
         ["ci_coverage  1.000 / 0.000","good","a linha mais afiada daqui","Nos 20 mercados simulados, o intervalo de 95% do 2SLS conteve a verdade todas as vezes, e o dos outros dois não conteve nenhuma. Um estimador que erra sempre com ar de certeza é mais perigoso que um que admite incerteza."],
@@ -1265,7 +1270,7 @@ const TRANSLATIONS = {
         ["credible = True em 3 de 20","warn","uma recusa honesta","Uma categoria só é precificada se passar de &minus;1,05 e se a estimativa for pelo menos o dobro da <button class=\"dfn\" data-def=\"se\" type=\"button\">própria margem de erro</button>. Dezessete não passam. Publicar preço para essas seria inventar precisão."],
         ["guardrails on  (+7.56%)","good","o resultado de capa","A margem sobe 7,56% enquanto a receita se move só &minus;1,04%, dentro do piso de &minus;2%, e o preço médio para exatamente no teto de +5%. Parar exatamente no teto significa que foi a regra que segurou, não o modelo."],
         ["guardrails off  (+33.34%)","warn","melhor no papel, inaceitável na prática","Ele chega lá empurrando todo preço para o topo da faixa de &plusmn;30%, abrindo mão de 28% do volume e de 6,66% da receita, o que fura o piso que um time real teria definido."],
-        ["25.79 pp","none","o preço da disciplina","A distância entre as duas políticas. Não é defeito: é o que custa poder dizer &ldquo;isso a gente não vai fazer&rdquo;, e saber o valor é o que transforma o trade-off em decisão em vez de acidente."]
+        ["25.79 pp","none","o preço da disciplina","Pontos percentuais, não por cento: a subtração direta de 33,34 menos 7,56. É a distância entre as duas políticas. Não é defeito: é o que custa poder dizer &ldquo;isso a gente não vai fazer&rdquo;, e saber o valor é o que transforma o trade-off em decisão em vez de acidente."]
       ],
       [
         ["persistence  RMSE 0.7155","none","o mínimo a superar","A previsão mais burra possível: a semana que vem é igual a esta. Qualquer modelo que não ganhe dela não justifica a própria existência."],

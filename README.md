@@ -8,6 +8,15 @@ that estimate into a constrained price list with a margin number attached.
 A single page covering the problem, the architecture, what each module does,
 the real output of every command, and the charts behind the numbers below.
 
+### **[Run it yourself in Colab](https://colab.research.google.com/github/BernardoliveiraFiap/price-optimization-olist/blob/main/notebooks/roteiro-por-niveis.ipynb)** [![Open in Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/BernardoliveiraFiap/price-optimization-olist/blob/main/notebooks/roteiro-por-niveis.ipynb)
+
+A guided notebook in ten levels that executes this repository end to end on a
+free Colab runtime, written in Portuguese. Each level states what its command
+does, asks the questions the output should raise, and answers them against the
+real numbers -- including the ones that reject this project's own preferred
+estimator. Levels 1 and 2 set up the environment and the dataset; the rest map
+one-to-one onto the `Makefile` targets.
+
 ## Overview
 
 Most pricing analyses stop at a coefficient. This one runs the whole chain and
