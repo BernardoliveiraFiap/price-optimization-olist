@@ -918,7 +918,7 @@ const TRANSLATIONS = {
     "arch.gateBody":"Every other box computes something. This one decides <strong>whether the pipeline is allowed to answer at all</strong>, and it asks two questions in order. First: is the instrument strong enough to be used, meaning is its <button class=\"dfn\" data-def=\"f\" type=\"button\">first-stage F</button> at least 10? Here it is 0.16, so 2SLS is thrown away and fixed effects carry the estimate. Second, per category: is this elasticity past <code>&minus;1.05</code> and at least twice its own <button class=\"dfn\" data-def=\"se\" type=\"button\">margin of error</button>? Three categories out of twenty say yes. The other seventeen leave with no price, which is why the box is drawn as a wall rather than a step.",
     "arch.boxes":[
       "1. invents a market and writes its true elasticity down first",
-      "2. turns nine Olist CSVs into 16,278 product-weeks",
+      "2. turns six Olist CSVs into 16,278 product-weeks",
       "3. fits the same demand curve three ways, reports all three",
       "4. decides whether an answer may leave the building",
       "5. picks one price per product, guardrails obeyed",
@@ -1063,7 +1063,7 @@ const TRANSLATIONS = {
     "files":[
       ["config.py","Holds the four guardrail numbers, the panel rules and the random seed","One place to change a policy constant, so no threshold is buried inside logic"],
       ["synth.py","Builds a market that does not exist: you choose the elasticity, it produces the sales","The backbone of validation, because switching the confound off has to remove the bias"],
-      ["data.py","Nine Olist CSVs go in; a panel of 16,278 product-weeks comes out, plus the cost instrument","Isolates every assumption about the real data in one readable place"],
+      ["data.py","Six Olist CSVs go in; a panel of 16,278 product-weeks comes out, plus the cost instrument","Isolates every assumption about the real data in one readable place"],
       ["elasticity/loglog_fe.py","The panel goes in; three elasticities come out, from pooled OLS, two-way fixed effects and 2SLS","Three assumptions about how the prices got set, three answers to compare"],
       ["demand/ml_forecast.py","Trains the gradient-boosted forecaster on past weeks, then asks it what a price move would do","Answers &ldquo;why not just use ML?&rdquo; with a fitted model instead of an opinion"],
       ["demand/review_nlp.py","Turns review text into a product-quality signal, kept apart from the delivery experience","A star rating conflates the product with the courier; only the text can split them"],
@@ -1139,7 +1139,7 @@ const TRANSLATIONS = {
     "arch.gateBody":"Todas as outras caixas calculam alguma coisa. Esta decide <strong>se o pipeline tem permissão para responder</strong>, e faz duas perguntas em ordem. Primeira: o instrumento é forte o bastante para ser usado, ou seja, o <button class=\"dfn\" data-def=\"f\" type=\"button\">F de primeiro estágio</button> chega a 10? Aqui ele dá 0,16, então o 2SLS vai fora e os efeitos fixos assumem a estimativa. Segunda, categoria por categoria: essa elasticidade passa de <code>&minus;1,05</code> e é pelo menos o dobro da <button class=\"dfn\" data-def=\"se\" type=\"button\">própria margem de erro</button>? Três categorias de vinte dizem que sim. As outras dezessete saem sem preço, e é por isso que a caixa é desenhada como parede, não como degrau.",
     "arch.boxes":[
       "1. inventa um mercado e escreve a elasticidade verdadeira dele",
-      "2. transforma nove CSVs do Olist em 16.278 produto-semana",
+      "2. transforma seis CSVs do Olist em 16.278 produto-semana",
       "3. ajusta a mesma curva de demanda de três formas e mostra as três",
       "4. decide se alguma resposta pode sair daqui",
       "5. escolhe um preço por produto, respeitando as travas",
@@ -1284,7 +1284,7 @@ const TRANSLATIONS = {
     "files":[
       ["config.py","Guarda os quatro números das travas, as regras do painel e a semente aleatória","Um só lugar para mudar uma constante de política, sem limiar enterrado dentro da lógica"],
       ["synth.py","Constrói um mercado que não existe: você escolhe a elasticidade, ele produz as vendas","A espinha dorsal da validação, porque desligar a variável escondida tem que remover o viés"],
-      ["data.py","Entram nove CSVs do Olist; sai um painel de 16.278 produto-semana, mais o instrumento de custo","Isola num lugar legível toda hipótese sobre o dado real"],
+      ["data.py","Entram seis CSVs do Olist; sai um painel de 16.278 produto-semana, mais o instrumento de custo","Isola num lugar legível toda hipótese sobre o dado real"],
       ["elasticity/loglog_fe.py","Entra o painel; saem três elasticidades, de OLS agrupado, efeitos fixos nas duas dimensões e 2SLS","Três hipóteses sobre como os preços foram definidos, três respostas para comparar"],
       ["demand/ml_forecast.py","Treina o previsor de gradient boosting nas semanas passadas e depois pergunta a ele o que um movimento de preço faria","Responde &ldquo;por que não usar ML?&rdquo; com um modelo ajustado em vez de opinião"],
       ["demand/review_nlp.py","Transforma o texto da avaliação em sinal de qualidade do produto, separado da experiência de entrega","A nota em estrelas mistura o produto com a transportadora; só o texto separa os dois"],
